@@ -2,7 +2,7 @@
 
 **Titre du projet** : Développement et implémentation de contrats intelligents sur la blockchain Ethereum
 
-**Date de remise** : 14 avril 2024  
+**Date de remise** : 14 avril 2025  
 **Étudiant(e)** : Vincent Bureau  
 **Dépôt Git** : https://github.com/HydroshieldMKII/veille-technologique-420-1SH-SW.git
 
@@ -20,13 +20,13 @@ Ce projet vise à explorer le développement et l'implémentation de contrats in
 
 Avant de choisir ce sujet, j'ai exploré plusieurs technologies :
 
-| Sujet exploré             | Résumé                                                                                     | Pourquoi non retenu/retenu                                                                    |
-| ------------------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
-| **Contrats intelligents** | Programmes auto-exécutables sur blockchain qui révolutionnent les transactions numériques. | Sujet retenu : représente une avancée majeure et ouvre la voie à des applications innovantes. |
-| **Reverse Proxy**         | Outils comme Nginx ou Traefik pour gérer le trafic et sécuriser les applications web.      | Technologie plus établie, moins innovante que les contrats intelligents.                      |
-| **WebAssembly**           | Format binaire permettant d'exécuter du code à haute performance dans les navigateurs.     | Intéressant mais moins disruptif que la technologie blockchain.                               |
-| **Rust**                  | Langage de programmation moderne axé sur la sécurité et la performance.                    | Apprentissage trop complexe pour la durée du projet.                                          |
-| **Kubernetes**            | Système d'orchestration de conteneurs pour automatiser le déploiement d'applications.      | Nécessite une infrastructure complexe                                                         |
+| Sujet exploré             | Résumé                                                                                     | Pourquoi non retenu/retenu                                                                       |
+| ------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| **Contrats intelligents** | Programmes auto-exécutables sur blockchain qui révolutionnent les transactions numériques. | Sujet retenu : représente une avancée majeure et ouvre la voie à de nouveaux types d'application |
+| **Reverse Proxy**         | Outils comme Nginx ou Traefik pour gérer le trafic et sécuriser les applications web.      | Technologie plus établie, moins innovante que les contrats intelligents.                         |
+| **WebAssembly**           | Format binaire permettant d'exécuter du code à haute performance dans les navigateurs.     | Intéressant mais moins disruptif que la technologie blockchain.                                  |
+| **Rust**                  | Langage de programmation moderne axé sur la sécurité et la performance.                    | Apprentissage trop complexe pour la durée du projet.                                             |
+| **Kubernetes**            | Système d'orchestration de conteneurs pour automatiser le déploiement d'applications.      | Nécessite une infrastructure complexe                                                            |
 
 Les contrats intelligents m'attirent particulièrement car ils représentent selon moi l'avenir des transactions sécurisées, tout en offrant un potentiel d'innovation dans de nombreux secteurs.
 
@@ -42,7 +42,7 @@ Les objectifs:
 - Apprendre le langage Solidity pour le développement d'un contrats sur Ethereum
 - Développer et déployer un contrat intelligent simple sur un environnement local (Ganache)
 
-L'idée est de créer un système fonctionnel qui pourrait servir de base pour des applications plus complexes à l'avenir. Il s'agit d'une preuve de concept qui pourrait être éventuellement étendue.
+L'idée est de créer un système fonctionnel qui pourrait servir de base pour une éventuelle applications plus complexes.
 
 ---
 
@@ -58,7 +58,7 @@ L'idée est de créer un système fonctionnel qui pourrait servir de base pour d
 
 - Conception d'un contrat simple (token ERC20 ou banque de citations)
 - Implémentation du contrat en Solidity
-- Tests préliminaires des fonctionnalités
+- Tests préliminaires des fonctionnalités du contrat
 
 **Jour 6-7 : Déploiement et tests**
 
@@ -92,7 +92,7 @@ L'idée est de créer un système fonctionnel qui pourrait servir de base pour d
 
 Si tout se déroule comme prévu, j'aurai développé et déployé un contrat intelligent fonctionnel.
 
-Ce projet sera réussi si :
+Le projet sera réussi si :
 
 - Le contrat est correctement déployé sur Ganache sans erreurs
 - Toutes les fonctionnalités prévues sont implémentées

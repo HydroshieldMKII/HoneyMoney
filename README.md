@@ -28,6 +28,33 @@ Avant de choisir ce sujet, j'ai exploré plusieurs technologies :
 | **Rust**                  | Langage de programmation moderne axé sur la sécurité et la performance.                    | Apprentissage trop complexe pour la durée du projet.                                             |
 | **Kubernetes**            | Système d'orchestration de conteneurs pour automatiser le déploiement d'applications.      | Nécessite une infrastructure complexe                                                            |
 
+## Ressources pour chaque sujet exploré
+
+**Contrats intelligents** :
+
+- [Ethereum.org](https://ethereum.org/en/developers/docs/smart-contracts/)
+- [Solidity Documentation](https://docs.soliditylang.org/en/v0.8.17/)
+
+**Reverse Proxy** :
+
+- [Nginx Documentation](https://nginx.org/en/docs/)
+- [Traefik Documentation](https://doc.traefik.io/traefik/)
+
+**WebAssembly** :
+
+- [WebAssembly.org](https://webassembly.org/)
+- [MDN Web Docs](https://developer.mozilla.org/en-US/docs/WebAssembly)
+
+**Rust** :
+
+- [Rust Programming Language](https://www.rust-lang.org/)
+- [Rust by Example](https://doc.rust-lang.org/stable/rust-by-example/)
+
+**Kubernetes** :
+
+- [Kubernetes Documentation](https://kubernetes.io/docs/home/)
+- [Kubernetes by Example](https://kubernetes.io/docs/tutorials/)
+
 Les contrats intelligents m'attirent particulièrement car ils représentent selon moi l'avenir des transactions sécurisées, tout en offrant un potentiel d'innovation dans de nombreux secteurs.
 
 ---

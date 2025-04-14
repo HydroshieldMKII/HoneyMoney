@@ -73,6 +73,40 @@ L'idée est de créer un système fonctionnel qui pourrait servir de base pour u
 
 ---
 
+# Défis anticipés
+
+Dans la réalisation du projet je prévois plusieurs défis :
+
+**Défis techniques :**
+
+- Comprendre le langage Solidity et ses particularités
+- Comprendre les concepts de sécurité pour éviter les vulnérabilités courantes
+- Gérer les limitations de la blockchain Ethereum (coût des transactions, vitesse)
+
+**Défis logistiques :**
+
+- Manque d'expertise initiale dans le domaine de la blockchain et des contrats intelligents
+- Absence d'accès à un réseau Ethereum principal (mainnet) à cause des coûts de transactions réelles
+- Configuration initiale potentiellement complexe de l'environnement de développement
+
+**Défis conceptuels :**
+
+- Assimiler rapidement les concepts cryptographiques de la blockchain
+- Penser en termes de programmation décentralisée, qui diffère significativement de la programmation traditionnelle
+- Concevoir un contrat intelligent véritablement utile et pertinent malgré sa simplicité
+
+## Accessibilité des ressources
+
+Toutes les ressources nécessaires au projet sont facilement accessibles :
+
+- **Solidity** : langage open source avec documentation complète et gratuite
+- **Remix IDE** : environnement de développement web accessible gratuitement sans installation
+- **Ganache** : logiciel gratuit qui simule une blockchain Ethereum locale
+- **web3.js** : bibliothèque JavaScript open source
+- **Truffle/Hardhat** : frameworks de développement gratuits
+
+Les tutoriels et la documentation pour ces outils sont abondants et de qualité, notamment sur Ethereum.org et GitHub
+
 # Plan de réalisation
 
 **Jour 1-2 : Apprentissage et configuration**

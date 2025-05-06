@@ -1,0 +1,16 @@
+require 'sinatra'
+
+set :bind, 'localhost'
+set :port, 3000
+
+get "/" do
+    send_file "#{__dir__}/../frontend/index.html"
+end
+
+get "/index.js" do
+    send_file "#{__dir__}/../frontend/app.js"
+end
+
+get "/index.css" do
+    send_file "#{__dir__}/../frontend/index.css"
+end

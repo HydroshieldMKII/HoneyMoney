@@ -202,7 +202,7 @@ document.getElementById("blacklist").onclick = async () => {
     const address = document.getElementById("blacklistAddress").value;
 
     try {
-        const tx = await token.blacklist(address);
+        const tx = await token.blacklist(address, true);
         await tx.wait();
         showToast("Address " + address + " has been blacklisted", "success");
         updateLeaderboard();
@@ -212,7 +212,7 @@ document.getElementById("blacklist").onclick = async () => {
 };
 
 document.getElementById("unblacklist").onclick = async () => {
-    const address = document.getElementById("unblacklistAddress").value;
+    const address = document.getElementById("blacklistAddress").value;
 
     try {
         const tx = await token.blacklist(address, false);

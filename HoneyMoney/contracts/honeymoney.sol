@@ -11,6 +11,8 @@ contract HoneyMoney is ERC20 {
     //save owner address
     address public owner;
     bool public paused = false;
+
+
     mapping(address => address[]) private blackListedAddresses;
 
     modifier adminOnly() {
@@ -51,26 +53,29 @@ contract HoneyMoney is ERC20 {
     // Blacklist an address for the caller
     function blacklist(address account, bool enabled) public {
         require(!paused, "Contract is paused");
-        require(!isBlacklisted(account), "Address is already blacklisted");
 
         if (!enabled) {
-            address[] storage blacklisted = blackListedAddresses[msg.sender];
-            for (uint i = 0; i < blacklisted.length; i++) {
-                if (blacklisted[i] == account) {
-                    delete blacklisted[i];
+            require(isBlacklisted(account), "Address is not blacklisted");
+            for (uint i = 0; i < blackListedAddresses[msg.sender].length; i++) {
+                if (blackListedAddresses[msg.sender][i] == account) {
+                    // Move the last element to the deleted spot
+                    blackListedAddresses[msg.sender][i] = blackListedAddresses[msg.sender][blackListedAddresses[msg.sender].length - 1];
+                    blackListedAddresses[msg.sender].pop();
                     break;
                 }
             }
-        }else{
+        }
+        else{
+            require(!isBlacklisted(account), "Address is already blacklisted");
             blackListedAddresses[msg.sender].push(account);
         }
     }
 
     // Check if an address is blacklisted for the caller
     function isBlacklisted(address account) public view returns (bool) {
-        address[] memory blacklisted = blackListedAddresses[msg.sender];
-        for (uint i = 0; i < blacklisted.length; i++) {
-            if (blacklisted[i] == account) {
+        address[] storage blacklist = blackListedAddresses[msg.sender];
+        for (uint i = 0; i < blacklist.length; i++) {
+            if (blacklist[i] == account) {
                 return true;
             }
         }

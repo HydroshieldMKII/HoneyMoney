@@ -32,9 +32,11 @@ contract HoneyMoney is ERC20 {
     function getOwner() public view returns (address) {
         return owner;
     }
+
     function getBlacklistedAddresses() public view returns (address[] memory) {
         return blackListedAddresses[msg.sender];
     }
+    
     function isPaused() public view returns (bool) {
         return paused;
     }

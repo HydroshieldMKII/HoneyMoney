@@ -13,6 +13,7 @@ const tokenABI = [
     "function togglePause()",
     "function isPaused() view returns (bool)",
     "function getOwner() view returns (address)",
+    "function totalSupply() view returns (uint)",
 ];
 
 let signer, token;
@@ -71,6 +72,8 @@ function decodeAndShowError(errorMessage) {
     showToast("Transaction was reverted: " + decodedError, "error");
 }
 
+// Functions
+
 document.addEventListener("DOMContentLoaded", async () => {
     if (typeof window.ethereum !== 'undefined') {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -82,6 +85,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         token = new ethers.Contract(tokenAddress, tokenABI, signer);
 
+        updateTotalSupply();
+        updateContractOwner();
         updatePauseState();
         updateBalance(address);
         updateLeaderboard();
@@ -102,10 +107,35 @@ document.getElementById("connect").onclick = async () => {
 
     token = new ethers.Contract(tokenAddress, tokenABI, signer);
 
+    updateTotalSupply();
+    updateContractOwner();
     updatePauseState();
     updateBalance(address);
     updateLeaderboard();
 };
+
+async function updateTotalSupply() {
+    try {
+        const rawSupply = await token.totalSupply();
+        const formattedSupply = parseFloat(ethers.utils.formatUnits(rawSupply, 18)).toFixed(4);
+        document.getElementById("totalSupply").innerText = formattedSupply;
+    }
+    catch (err) {
+        console.error("Error getting total supply:", err);
+        document.getElementById("totalSupply").innerText = "Error";
+    }
+}
+
+async function updateContractOwner() {
+    try {
+        const owner = await token.getOwner();
+        document.getElementById("contractOwner").innerText = owner;
+    }
+    catch (err) {
+        console.error("Error getting contract owner:", err);
+        document.getElementById("contractOwner").innerText = "Error";
+    }
+}
 
 async function updatePauseState() {
     try {
@@ -206,6 +236,7 @@ document.getElementById("mint").onclick = async () => {
         await tx.wait();
         showToast("You minted " + amount + " tokens to " + to, "success");
         updateBalance(await signer.getAddress());
+        updateTotalSupply();
         updateLeaderboard();
     } catch (err) {
         decodeAndShowError(err.message);
@@ -221,6 +252,7 @@ document.getElementById("burn").onclick = async () => {
         await tx.wait();
         showToast("Burn successful!", "success");
         updateBalance(await signer.getAddress());
+        updateTotalSupply();
         updateLeaderboard();
     } catch (err) {
         decodeAndShowError(err.message);

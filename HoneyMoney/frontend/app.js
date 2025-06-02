@@ -8,7 +8,11 @@ const tokenABI = [
     "function burn(address from, uint amount)",
     "function isBlacklisted(address) view returns (bool)",
     "function blacklist(address, bool) returns (bool)",
-    "function clearBlacklist()"
+    "function getBlacklistedAddresses() view returns (address[])",
+    "function clearBlacklist()",
+    "function togglePause()",
+    "function isPaused() view returns (bool)",
+    "function getOwner() view returns (address)",
 ];
 
 let signer, token;
@@ -78,6 +82,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         token = new ethers.Contract(tokenAddress, tokenABI, signer);
 
+        updatePauseState();
         updateBalance(address);
         updateLeaderboard();
 
@@ -97,9 +102,22 @@ document.getElementById("connect").onclick = async () => {
 
     token = new ethers.Contract(tokenAddress, tokenABI, signer);
 
+    updatePauseState();
     updateBalance(address);
     updateLeaderboard();
 };
+
+async function updatePauseState() {
+    try {
+        const isPaused = await token.isPaused();
+        document.getElementById("pauseState").innerText = isPaused ? "Paused" : "Active";
+        document.getElementById("togglePause").innerText = isPaused ? "Unpause Contract" : "Pause Contract";
+        updatePauseState();
+    } catch (err) {
+        console.error("Error getting pause state:", err);
+        document.getElementById("pauseState").innerText = "Error";
+    }
+}
 
 async function updateBalance(address) {
     try {
@@ -152,6 +170,17 @@ async function updateLeaderboard() {
     });
 }
 
+document.getElementById("togglePause").onclick = async () => {
+    try {
+        const tx = await token.togglePause();
+        await tx.wait();
+        showToast("Contract pause state toggled", "success");
+        updateLeaderboard();
+    } catch (err) {
+        decodeAndShowError(err.message);
+    }
+}
+    
 document.getElementById("send").onclick = async () => {
     const recipient = document.getElementById("recipient").value;
     const amount = document.getElementById("amount").value;

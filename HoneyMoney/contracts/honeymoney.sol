@@ -29,6 +29,16 @@ contract HoneyMoney is ERC20 {
         paused = !paused;
     }
 
+    function getOwner() public view returns (address) {
+        return owner;
+    }
+    function getBlacklistedAddresses() public view returns (address[] memory) {
+        return blackListedAddresses[msg.sender];
+    }
+    function isPaused() public view returns (bool) {
+        return paused;
+    }
+
     // Override transfer function to include blacklist check
     function transfer(address recipient, uint256 amount) public override returns (bool) {
         require(!paused, "Contract is paused");

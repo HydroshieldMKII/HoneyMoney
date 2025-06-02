@@ -5,7 +5,10 @@ const tokenABI = [
     "function balanceOf(address) view returns (uint)",
     "function transfer(address to, uint amount) returns (bool)",
     "function mint(address to, uint amount)",
-    "function burn(address from, uint amount)"
+    "function burn(address from, uint amount)",
+    "function isBlacklisted(address) view returns (bool)",
+    "function blacklist(address, bool) returns (bool)",
+    "function clearBlacklist()"
 ];
 
 let signer, token;
@@ -23,7 +26,7 @@ const hardhatAccounts = [
     "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720"
 ];
 
-// Toast utility
+// Helpers
 function showToast(message, type = "info") {
     const toastId = `toast-${Date.now()}`;
     const colorClass = {
@@ -53,6 +56,17 @@ function showToast(message, type = "info") {
     }, 5000);
 }
 
+function decodeAndShowError(errorMessage) {
+    let decodedError = errorMessage;
+    if (errorMessage.includes('reverted with reason string')) {
+        const reasonMatch = errorMessage.match(/reverted with reason string '([^']+)'/);
+        if (reasonMatch) {
+            decodedError = reasonMatch[1];
+        }
+    }
+    showToast("Transaction was reverted: " + decodedError, "error");
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
     if (typeof window.ethereum !== 'undefined') {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -68,7 +82,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         updateLeaderboard();
 
         document.getElementById("connect").style.display = "none";
-        document.getElementById("disconnect").style.display = "block";
     } else {
         showToast("Metamask not detected!", "error");
     }
@@ -105,21 +118,25 @@ async function updateLeaderboard() {
     const balances = await Promise.all(
         hardhatAccounts.map(async (address) => {
             try {
-                const raw = await token.balanceOf(address);
-                console.log("Raw balance for", address, ":", raw);
+                const rawBalance = await token.balanceOf(address);
+                const isBlacklisted = await token.isBlacklisted(address);
                 return {
                     address,
-                    balance: parseFloat(ethers.utils.formatUnits(raw, 18))
+                    balance: parseFloat(ethers.utils.formatUnits(rawBalance, 18)),
+                    isBlacklisted: isBlacklisted
                 };
             } catch (e) {
                 console.error("Error fetching balance for", address, e);
                 return {
                     address,
-                    balance: "UNKNOWN"
+                    balance: "UNKNOWN",
+                    isBlacklisted: false
                 };
             }
         })
     );
+
+    console.log("Balances fetched:", balances);
 
     balances.sort((a, b) => b.balance - a.balance);
 
@@ -128,7 +145,7 @@ async function updateLeaderboard() {
         const row = document.createElement("tr");
         row.innerHTML = `
             <td>${index + 1}</td>
-            <td class="text-monospace">${entry.address}</td>
+            <td class="text-monospace ${entry.isBlacklisted ? "text-danger" : ""}">${entry.address}</td>
             <td>${entry.balance.toFixed(4)}</td>
         `;
         leaderboardBody.appendChild(row);
@@ -147,7 +164,7 @@ document.getElementById("send").onclick = async () => {
         updateBalance(await signer.getAddress());
         updateLeaderboard();
     } catch (err) {
-        showToast("Transfer failed: " + err.message, "error");
+        decodeAndShowError(err.message);
     }
 };
 
@@ -162,7 +179,7 @@ document.getElementById("mint").onclick = async () => {
         updateBalance(await signer.getAddress());
         updateLeaderboard();
     } catch (err) {
-        showToast("Mint failed: " + err.message, "error");
+        decodeAndShowError(err.message);
     }
 };
 
@@ -177,6 +194,43 @@ document.getElementById("burn").onclick = async () => {
         updateBalance(await signer.getAddress());
         updateLeaderboard();
     } catch (err) {
-        showToast("Burn failed: " + err.message, "error");
+        decodeAndShowError(err.message);
+    }
+};
+
+document.getElementById("blacklist").onclick = async () => {
+    const address = document.getElementById("blacklistAddress").value;
+
+    try {
+        const tx = await token.blacklist(address);
+        await tx.wait();
+        showToast("Address " + address + " has been blacklisted", "success");
+        updateLeaderboard();
+    } catch (err) {
+        decodeAndShowError(err.message);
+    }
+};
+
+document.getElementById("unblacklist").onclick = async () => {
+    const address = document.getElementById("unblacklistAddress").value;
+
+    try {
+        const tx = await token.blacklist(address, false);
+        await tx.wait();
+        showToast("Address " + address + " has been removed from the blacklist", "success");
+        updateLeaderboard();
+    } catch (err) {
+        decodeAndShowError(err.message);
+    }
+}
+
+document.getElementById("clearBlacklist").onclick = async () => {
+    try {
+        const tx = await token.clearBlacklist();
+        await tx.wait();
+        showToast("Blacklist cleared", "success");
+        updateLeaderboard();
+    } catch (err) {
+        decodeAndShowError(err.message);
     }
 };

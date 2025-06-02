@@ -16,18 +16,26 @@
 <body class="text-dark">
 
     <div class="container py-4">
-        <h1 class="text-center mb-4">HoneyMoney</h1>
+        <h1 class="text-center mb-4">🍯 HoneyMoney 🍯</h1>
 
+        <!-- Wallet/Stats -->
         <div class="card mb-4">
             <div class="card-body">
                 <button class="btn btn-primary mb-3" id="connect">Connect Wallet</button>
                 <h3><strong>Your wallet details</strong></h3>
                 <p><strong>Wallet address:</strong> <span id="wallet" class="text-monospace">Not connected</span></p>
                 <p><strong>Balance:</strong> <span id="balance">?</span> BEE</p>
-                <p><strong>Blacklist status:</strong> <span id="blacklistStatus">Not checked</span></p>
             </div>
         </div>
 
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <h2>HoneyMoney Contract</h2>
+                <button class="btn btn-primary" id="contractAddress">Pause / enable</button>
+            </div>
+        </div>
+
+        <!-- Token Management -->
         <div class="row mb-4">
             <div class="col-md-4">
                 <h4>Send HoneyMoney</h4>
@@ -51,15 +59,18 @@
             </div>
         </div>
 
+        <!-- Blacklist Management -->
         <div class="row mb-4">
             <div class="col-md-4">
                 <h4>Blacklist</h4>
                 <input class="form-control mb-2" id="blacklistAddress" placeholder="Address to blacklist" />
                 <button class="form-control btn btn-danger" id="blacklist">Blacklist</button>
+                <button class="form-control btn btn-success mt-2" id="unblacklist">Remove from blacklist</button>
                 <button class="form-control btn btn-secondary mt-2" id="clearBlacklist">Clear blacklist</button>
             </div>
         </div>
 
+        <!-- Blacklist Status -->
         <h3>Leaderboard</h3>
         <table class="table table-striped table-bordered" id="leaderboard">
             <thead class="table-dark">
@@ -70,9 +81,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td colspan="3">Loading...</td>
-                </tr>
+                <!-- Leaderboard entries will be dynamically inserted here -->
             </tbody>
         </table>
     </div>

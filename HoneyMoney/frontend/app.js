@@ -91,13 +91,7 @@ document.getElementById("connect").onclick = async () => {
 async function updateBalance(address) {
     try {
         const rawBalance = await token.balanceOf(address);
-        console.log("Raw balance:", rawBalance);
-        const formatted = ethers.utils.formatUnits(rawBalance, 18);
-        const display = new Intl.NumberFormat("en-US", {
-            maximumFractionDigits: 4,
-        }).format(parseFloat(formatted));
-
-        document.getElementById("balance").innerText = display;
+        document.getElementById("balance").innerText = parseFloat(ethers.utils.formatUnits(rawBalance, 18)).toFixed(4);
     } catch (err) {
         document.getElementById("balance").innerText = "Error";
         console.error("Error getting balance:", err);

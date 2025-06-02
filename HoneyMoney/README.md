@@ -1,4 +1,28 @@
+# MetaMask add local blockchain
+## Values
+| Field                  | Value                                    |
+| ---------------------- | ---------------------------------------- |
+| **Network Name**       | *name*                                   |
+| **New RPC URL**        | *url*                                    |
+| **Chain ID**           | `31337` (default for Hardhat)            |
+| **Currency Symbol**    | ETH                                      |
+| **Block Explorer URL** | *Leave empty*                            |
+
+
+
 # Backend server
+
+## Dependency
+
+```bash
+sudo apt update
+sudo apt install build-essential libssl-dev zlib1g-dev libreadline-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt1-dev libcurl4-openssl-dev libffi-dev ruby-full ruby-dev
+```
+
+```bash
+gem install sinatra puma rackup
+```
+
 ## Running the Backend Server
 
 ```bash
@@ -22,7 +46,7 @@ npx hardhat compile
 
 ### Start Local Blockchain Node
 ```bash
-npx hardhat node
+npx hardhat node --hostname 0.0.0.0 --port 8545
 ```
 
 ### Deploy Smart Contract

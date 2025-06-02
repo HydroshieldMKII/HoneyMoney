@@ -48,7 +48,6 @@ function showToast(message, type = "info") {
     const toast = new bootstrap.Toast(toastEl);
     toast.show();
 
-    //delete the toast after 5 seconds
     setTimeout(() => {
         toastEl.remove();
     }, 5000);
@@ -69,8 +68,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         updateLeaderboard();
 
         document.getElementById("connect").style.display = "none";
+        document.getElementById("disconnect").style.display = "block";
     } else {
-        showToast("Install MetaMask first!", "error");
+        showToast("Metamask not detected!", "error");
     }
 });
 
@@ -91,6 +91,7 @@ document.getElementById("connect").onclick = async () => {
 async function updateBalance(address) {
     try {
         const rawBalance = await token.balanceOf(address);
+        console.log("Raw balance:", rawBalance);
         const formatted = ethers.utils.formatUnits(rawBalance, 18);
         const display = new Intl.NumberFormat("en-US", {
             maximumFractionDigits: 4,
@@ -111,14 +112,16 @@ async function updateLeaderboard() {
         hardhatAccounts.map(async (address) => {
             try {
                 const raw = await token.balanceOf(address);
+                console.log("Raw balance for", address, ":", raw);
                 return {
                     address,
                     balance: parseFloat(ethers.utils.formatUnits(raw, 18))
                 };
             } catch (e) {
+                console.error("Error fetching balance for", address, e);
                 return {
                     address,
-                    balance: 0
+                    balance: "UNKNOWN"
                 };
             }
         })

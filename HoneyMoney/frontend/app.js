@@ -16,7 +16,7 @@ const tokenABI = [
     "function totalSupply() view returns (uint)",
 ];
 
-let signer, token;
+let signer, token, provider;
 
 const hardhatAccounts = [
     "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
@@ -74,10 +74,70 @@ function decodeAndShowError(errorMessage) {
 
 // Functions
 
+function tamperBlock(index) {
+  const container = document.getElementById("blockchain-visual");
+  const blockDivs = container.children;
+
+  const tamperedDiv = blockDivs[index];
+  tamperedDiv.style.backgroundColor = "#ffcccc";
+  tamperedDiv.querySelector("strong").innerText += " (Tampered!)";
+
+  // Show downstream invalidation
+  for (let i = index + 1; i < blockDivs.length; i++) {
+    blockDivs[i].style.backgroundColor = "#ffdddd";
+    blockDivs[i].querySelector("strong").innerText += " (Invalid Chain!)";
+  }
+}
+
+function renderBlockchain(blocks) {
+  const container = document.getElementById("blockchain-visual");
+  container.innerHTML = ""; // Clear
+
+  blocks.forEach((block, index) => {
+    const blockDiv = document.createElement("div");
+    blockDiv.className = "d-inline-block border rounded m-1 p-2";
+    blockDiv.style.backgroundColor = "#f1f1f1";
+    blockDiv.style.width = "250px";
+
+    blockDiv.innerHTML = `
+      <strong>Block #${block.number}</strong><br/>
+      <span style="font-size: 0.8em;">Hash: ${block.hash.slice(0, 10)}...</span><br/>
+      <span style="font-size: 0.8em;">Parent: ${block.parentHash.slice(0, 10)}...</span><br/>
+      <span style="font-size: 0.8em;">Timestamp: ${new Date(block.timestamp * 1000).toLocaleString()}</span><br/>
+      <button class="btn btn-sm btn-warning mt-2" onclick="tamperBlock(${index})">Tamper</button>
+    `;
+    container.appendChild(blockDiv);
+  });
+}
+
+
+async function loadAllBlocks() {
+    console.log("Loading all blocks...");
+  let blockNumber = 0;
+  const blocks = [];
+
+  // Fetch until block doesn't exist
+  while (true) {
+    try {
+      const block = await provider.getBlock(blockNumber);
+      console.log(`Fetched block #${blockNumber}`, block);
+      if (!block) break;
+      blocks.push(block);
+      blockNumber++;
+    } catch (e) {
+        console.error(`Error fetching block #${blockNumber}:`, e);
+      break;
+    }
+  }
+
+  renderBlockchain(blocks);
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
     if (typeof window.ethereum !== 'undefined') {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        provider = new ethers.providers.Web3Provider(window.ethereum);
         await provider.send("eth_requestAccounts", []);
+
         signer = provider.getSigner();
 
         const address = await signer.getAddress();
@@ -90,6 +150,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         updatePauseState();
         updateBalance(address);
         updateLeaderboard();
+
+        loadAllBlocks();
 
         document.getElementById("connect").style.display = "none";
     } else {

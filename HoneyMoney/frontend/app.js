@@ -212,14 +212,25 @@ document.getElementById("togglePause").onclick = async () => {
 }
     
 document.getElementById("send").onclick = async () => {
-    const recipient = document.getElementById("recipient").value;
-    const amount = document.getElementById("amount").value;
+    const recipient = document.getElementById("recipient").value.trim();
+    const amount = document.getElementById("amount").value.trim();
+
+    if (!ethers.utils.isAddress(recipient)) {
+        showToast("Invalid recipient address!", "error");
+        return;
+    }
+    if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+        showToast("Invalid transfer amount!", "error");
+        return;
+    }
+
+    console.log("Sending tokens:", recipient, amount);
 
     try {
         const tx = await token.transfer(recipient, ethers.utils.parseUnits(amount, 18));
         await tx.wait();
 
-        showToast("Transfer successful! You sent " + amount + " tokens to " + recipient, "success");
+        showToast(`Transfer successful! You sent ${amount} tokens to ${recipient}`, "success");
         updateBalance(await signer.getAddress());
         updateLeaderboard();
     } catch (err) {
@@ -227,14 +238,24 @@ document.getElementById("send").onclick = async () => {
     }
 };
 
+
 document.getElementById("mint").onclick = async () => {
-    const to = document.getElementById("mintTo").value || await signer.getAddress();
-    const amount = document.getElementById("mintAmount").value;
+    const to = document.getElementById("mintTo").value.trim() || await signer.getAddress();
+    const amount = document.getElementById("mintAmount").value.trim();
+
+    if (!ethers.utils.isAddress(to)) {
+        showToast("Invalid address to mint to!", "error");
+        return;
+    }
+    if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+        showToast("Invalid transfer amount!", "error");
+        return;
+    }
 
     try {
         const tx = await token.mint(to, ethers.utils.parseUnits(amount, 18));
         await tx.wait();
-        showToast("You minted " + amount + " tokens to " + to, "success");
+        showToast(`You minted ${amount} tokens to ${to}`, "success");
         updateBalance(await signer.getAddress());
         updateTotalSupply();
         updateLeaderboard();
@@ -243,9 +264,19 @@ document.getElementById("mint").onclick = async () => {
     }
 };
 
+
 document.getElementById("burn").onclick = async () => {
-    const from = document.getElementById("burnFrom").value || await signer.getAddress();
-    const amount = document.getElementById("burnAmount").value;
+    const from = document.getElementById("burnFrom").value.trim() || await signer.getAddress();
+    const amount = document.getElementById("burnAmount").value.trim();
+
+    if (!ethers.utils.isAddress(from)) {
+        showToast("Invalid address to burn from!", "error");
+        return;
+    }
+    if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+        showToast("Invalid transfer amount!", "error");
+        return;
+    }
 
     try {
         const tx = await token.burn(from, ethers.utils.parseUnits(amount, 18));
@@ -259,13 +290,19 @@ document.getElementById("burn").onclick = async () => {
     }
 };
 
+
 document.getElementById("blacklist").onclick = async () => {
-    const address = document.getElementById("blacklistAddress").value;
+    const address = document.getElementById("blacklistAddress").value.trim();
+
+    if (!ethers.utils.isAddress(address)) {
+        showToast("Invalid address to blacklist!", "error");
+        return;
+    }
 
     try {
         const tx = await token.blacklist(address, true);
         await tx.wait();
-        showToast("Address " + address + " has been blacklisted", "success");
+        showToast(`Address ${address} has been blacklisted`, "success");
         updateLeaderboard();
     } catch (err) {
         decodeAndShowError(err.message);
@@ -273,17 +310,23 @@ document.getElementById("blacklist").onclick = async () => {
 };
 
 document.getElementById("unblacklist").onclick = async () => {
-    const address = document.getElementById("blacklistAddress").value;
+    const address = document.getElementById("blacklistAddress").value.trim();
+
+    if (!ethers.utils.isAddress(address)) {
+        showToast("Invalid address to unblacklist!", "error");
+        return;
+    }
 
     try {
         const tx = await token.blacklist(address, false);
         await tx.wait();
-        showToast("Address " + address + " has been removed from the blacklist", "success");
+        showToast(`Address ${address} has been removed from the blacklist`, "success");
         updateLeaderboard();
     } catch (err) {
         decodeAndShowError(err.message);
     }
-}
+};
+
 
 document.getElementById("clearBlacklist").onclick = async () => {
     try {

@@ -165,3 +165,12 @@ Le projet sera réussi si :
 # Conclusion
 
 Ce projet permet d'explorer une technologie révolutionnaire qui transforme déjà de nombreux secteurs d'activité. Les contrats intelligents représentent une étape importante vers la décentralisation des applications et l'automatisation des processus.
+
+# Lien de recherche
+- [Ethers.js](https://docs.ethers.org/v6/)
+- [Solidity](https://docs.soliditylang.org/en/v0.8.30/)
+- [OpenZeppelin ERC20](https://docs.openzeppelin.com/contracts/4.x/erc20-supply)
+
+# Problèmes rencontrés
+- Déploiement du contrat avec Hardhat
+- Gestion des array en Solidity

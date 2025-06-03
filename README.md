@@ -172,5 +172,6 @@ Ce projet permet d'explorer une technologie révolutionnaire qui transforme déj
 - [OpenZeppelin ERC20](https://docs.openzeppelin.com/contracts/4.x/erc20-supply)
 
 # Problèmes rencontrés
-- Déploiement du contrat avec Hardhat
+- Déploiement du contrat avec Hardhat sur un domaine (RPC autre domaine)
 - Gestion des array en Solidity
+- Configuration des scripts (Disable automine)

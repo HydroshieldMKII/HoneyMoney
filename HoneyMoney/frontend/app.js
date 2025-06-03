@@ -71,7 +71,10 @@ const toBuffer = (hexString) => {
 };
 
 const toHex = (buffer) =>
-  "0x" + Array.from(buffer).map((b) => b.toString(16).padStart(2, "0")).join("");
+  "0x" +
+  Array.from(buffer)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 
 const keccak256 = (data) => toHex(sha3_256.update(data).digest());
 
@@ -106,7 +109,10 @@ const loadRealBlocksWithFullHeader = async () => {
   while (true) {
     try {
       const hexBlockNumber = ethers.utils.hexValue(blockNumber);
-      const block = await provider.send("eth_getBlockByNumber", [hexBlockNumber, true]);
+      const block = await provider.send("eth_getBlockByNumber", [
+        hexBlockNumber,
+        true,
+      ]);
       if (!block || !block.hash) {
         console.error(`Invalid block #: ${blockNumber}`, block);
         break;
@@ -114,8 +120,8 @@ const loadRealBlocksWithFullHeader = async () => {
       blocks.push(block);
       blockNumber++;
     } catch (e) {
-        console.error("Error fetching block:", e);
-        break;
+      console.error("Error fetching block:", e);
+      break;
     }
   }
 
@@ -130,53 +136,55 @@ const renderBlockchain = (blocks) => {
   const container = document.getElementById("blockchain-container");
   container.innerHTML = "";
 
-blocks.forEach((block, idx) => {
-  const blockDiv = document.createElement("div");
-  blockDiv.className = "block p-3 mb-3 border rounded bg-light";
+  blocks.forEach((block, idx) => {
+    const blockDiv = document.createElement("div");
+    blockDiv.className = "block p-3 mb-3 border rounded bg-light";
 
-  const blockNumber = parseInt(block.number, 16);
-  const timestamp = new Date(parseInt(block.timestamp, 16) * 1000).toISOString();
+    const blockNumber = parseInt(block.number, 16);
+    const timestamp = new Date(
+      parseInt(block.timestamp, 16) * 1000
+    ).toISOString();
 
-  // Parse transaction data (like in your earlier code)
-  let functionName = "N/A";
-  let from = "N/A";
-  let to = "N/A";
-  if (block.transactions && block.transactions.length > 0) {
-    const tx = block.transactions[0];
-    from = tx.from;
-    to = tx.to;
-    const iface = new ethers.utils.Interface(tokenABI);
-    try {
-      const parsedTx = iface.parseTransaction({
-        data: tx.input,
-        value: tx.value,
-      });
-      functionName = parsedTx.name;
-    } catch (err) {
-      functionName = "Unknown or Constructor";
+    // Parse transaction data (like in your earlier code)
+    let functionName = "N/A";
+    let from = "N/A";
+    let to = "N/A";
+    if (block.transactions && block.transactions.length > 0) {
+      const tx = block.transactions[0];
+      from = tx.from;
+      to = tx.to;
+      const iface = new ethers.utils.Interface(tokenABI);
+      try {
+        const parsedTx = iface.parseTransaction({
+          data: tx.input,
+          value: tx.value,
+        });
+        functionName = parsedTx.name;
+      } catch (err) {
+        functionName = "Unknown or Constructor";
+      }
     }
-  }
 
-  blockDiv.innerHTML = `
+    blockDiv.innerHTML = `
     <div><label>Block #:</label><input class="form-control form-control-sm mb-2 block-number" value="${blockNumber}"></div>
     <div><label>Timestamp:</label><input class="form-control form-control-sm mb-2 timestamp" value="${timestamp}"></div>
     <div><label>Miner:</label><input class="form-control form-control-sm mb-2 miner" value="${block.miner}"></div>
     <div><label>Parent Hash:</label><input class="form-control form-control-sm mb-2 parent-hash" value="${block.parentHash}"></div>
-    <div><label>Transactions Count:</label><input class="form-control form-control-sm mb-2" value="${block.transactions.length}"></div>
     <div><label>Blockchain Hash:</label><input class="form-control form-control-sm mb-2 hash" value="${block.hash || "N/A"}"></div>
     <div class="mt-2"><strong>Decoded Transaction:</strong></div>
     <div><label>Function:</label><input class="form-control form-control-sm mb-2" value="${functionName}"></div>
     <div><label>From:</label><input class="form-control form-control-sm mb-2" value="${from}"></div>
     <div><label>To (Contract):</label><input class="form-control form-control-sm mb-2" value="${to}"></div>
-  `;
+    `;
 
-  container.appendChild(blockDiv);
-});
 
+    container.appendChild(blockDiv);
+  });
 
   const blocksDivs = container.querySelectorAll(".block");
 
   const recalculateAndValidate = async () => {
+    console.log("Recalculating and validating blocks...");
     let previousHash = null;
 
     for (let i = 0; i < blocksDivs.length; i++) {
@@ -186,43 +194,75 @@ blocks.forEach((block, idx) => {
       const minerInput = blockDiv.querySelector(".miner");
       const timestampInput = blockDiv.querySelector(".timestamp");
       const blockNumberInput = blockDiv.querySelector(".block-number");
-      const nonceInput = blockDiv.querySelector(".nonce");
-      const extraDataInput = blockDiv.querySelector(".extra-data");
-      const gasLimitInput = blockDiv.querySelector(".gas-limit");
 
+      // Create an updated block object with only relevant fields
       const updatedBlock = {
-        ...blocks[i], // fallback for non-editable fields
+        ...blocks[i],
         parentHash: parentHashInput.value,
         miner: minerInput.value,
         number: parseInt(blockNumberInput.value),
         timestamp: Math.floor(new Date(timestampInput.value).getTime() / 1000),
-        nonce: nonceInput.value,
-        extraData: extraDataInput.value,
-        gasLimit: gasLimitInput.value,
       };
 
+      // Recompute block hash
       const recalculatedHash = await computeEthereumBlockHash(updatedBlock);
-      hashInput.value = recalculatedHash;
-      previousHash = recalculatedHash;
+      const previousHashBeforeUpdate = hashInput.value;
 
-      // Update next block's parentHash
-      const nextBlockDiv = blocksDivs[i + 1];
-      if (nextBlockDiv) {
-        const nextParentHashInput = nextBlockDiv.querySelector(".parent-hash");
-        if (nextParentHashInput.value !== previousHash) {
-          nextParentHashInput.value = previousHash;
+      hashInput.value = recalculatedHash;
+
+      // If hash has changed, propagate to next blocks
+      if (recalculatedHash !== previousHashBeforeUpdate) {
+        let j = i + 1;
+        let currentParentHash = recalculatedHash;
+
+        while (j < blocksDivs.length) {
+          const nextBlockDiv = blocksDivs[j];
+          const nextParentHashInput =
+            nextBlockDiv.querySelector(".parent-hash");
+          const nextHashInput = nextBlockDiv.querySelector(".hash");
+          const nextMinerInput = nextBlockDiv.querySelector(".miner");
+          const nextTimestampInput = nextBlockDiv.querySelector(".timestamp");
+          const nextBlockNumberInput =
+            nextBlockDiv.querySelector(".block-number");
+
+          const updatedNextBlock = {
+            ...blocks[j],
+            parentHash: currentParentHash,
+            miner: nextMinerInput.value,
+            number: parseInt(nextBlockNumberInput.value),
+            timestamp: Math.floor(
+              new Date(nextTimestampInput.value).getTime() / 1000
+            ),
+          };
+
+          // Update parent hash field in the next block
+        //   nextParentHashInput.value = currentParentHash;
+
+          // Recompute hash
+          const nextHash = await computeEthereumBlockHash(updatedNextBlock);
+          const prevNextHash = nextHashInput.value;
+          nextHashInput.value = nextHash;
+
+          currentParentHash = nextHash;
+
+          if (nextHash === prevNextHash) break; // Stop if no change further
+          j++;
         }
       }
+
+      previousHash = recalculatedHash;
     }
 
-    // Validation phase: check if each block's parentHash matches previous block's hash
+    // Validation phase
     for (let i = 1; i < blocksDivs.length; i++) {
       const currentBlockDiv = blocksDivs[i];
       const expectedParentHash = blocksDivs[i - 1].querySelector(".hash").value;
-      const actualParentHash = currentBlockDiv.querySelector(".parent-hash").value;
+      const actualParentHash =
+        currentBlockDiv.querySelector(".parent-hash").value;
 
       if (actualParentHash !== expectedParentHash) {
-        currentBlockDiv.style.borderColor = "red";
+        console.warn("Parent hash mismatch at block", i);
+        currentBlockDiv.classList.add("bg-danger");
       } else {
         currentBlockDiv.style.borderColor = "";
       }
@@ -231,13 +271,13 @@ blocks.forEach((block, idx) => {
 
   // Attach event listeners to inputs
   blocksDivs.forEach((blockDiv) => {
+    console.log(`Attaching input listeners to block div ${blockDiv.querySelector(".block-number").value}`);
     const inputs = blockDiv.querySelectorAll("input");
     inputs.forEach((input) => {
       input.addEventListener("input", recalculateAndValidate);
     });
   });
 };
-
 
 // -------------------- STATE UPDATES --------------------
 const updateTotalSupply = async () => {
@@ -266,8 +306,8 @@ const updatePauseState = async () => {
   try {
     const paused = await token.isPaused();
     document.getElementById("pauseState").innerText = paused
-      ? "Paused"
-      : "Active";
+      ? "Paused enabled"
+      : "Disabled";
     document.getElementById("togglePause").innerText = paused
       ? "Unpause Contract"
       : "Pause Contract";
@@ -336,6 +376,7 @@ const handleTransaction = async (action, successMsg) => {
     await updateTotalSupply();
     await updateLeaderboard();
     await loadRealBlocksWithFullHeader();
+    await updatePauseState();
   } catch (err) {
     showToast(`Error: ${err.message}`, "error");
   }

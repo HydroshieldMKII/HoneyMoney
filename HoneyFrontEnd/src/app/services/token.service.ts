@@ -369,7 +369,7 @@ export class TokenService {
 
   async burn(params: TransactionParams): Promise<void> {
     const { amount } = params;
-    const from = params.from || this.walletService.getCurrentAddress();
+    const from = params.from?.trim() || this.walletService.getCurrentAddress();
     
     if (!amount) {
       this.toastService.error('Amount is required');

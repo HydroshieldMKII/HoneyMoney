@@ -14,8 +14,10 @@ import {
   BlockchainService,
   BlockData,
   DecodedTransaction,
+  LoadingProgress,
 } from '../../services/blockchain.service';
 import { WalletService } from '../../services/wallet.service';
+import { BlockchainLoadingProgressComponent } from './blockchain-loading-progress';
 
 @Component({
   selector: 'app-blockchain-viewer',
@@ -28,6 +30,7 @@ import { WalletService } from '../../services/wallet.service';
     HlmCardDescriptionDirective,
     HlmCardContentDirective,
     HlmButtonDirective,
+    BlockchainLoadingProgressComponent,
   ],
   template: `
     <section hlmCard class="w-4/5 mx-auto mb-5" *ngIf="connected$ | async">
@@ -44,7 +47,7 @@ import { WalletService } from '../../services/wallet.service';
             hlmBtn
             (click)="loadBlocks()"
             [disabled]="loading$ | async"
-            variant="secondary"
+            variant="default"
           >
             {{ (loading$ | async) ? 'Loading...' : 'Refresh Blocks' }}
           </button>
@@ -89,13 +92,13 @@ import { WalletService } from '../../services/wallet.service';
           <p class="text-red-800 dark:text-red-200">{{ error }}</p>
         </div>
 
-        <!-- Loading State -->
-        <div *ngIf="loading$ | async" class="text-center py-8">
-          <div class="inline-flex items-center space-x-2">
-            <div
-              class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"
-            ></div>
-            <span>Loading blockchain data...</span>
+        <!-- Loading State with Progress Bar -->
+        <div *ngIf="progress$ | async as progress" class="mb-6">
+          <div *ngIf="progress.isLoading" class="py-8">
+            <app-blockchain-loading-progress
+              [currentBlock]="progress.currentBlock"
+              [totalBlocks]="progress.totalBlocks">
+            </app-blockchain-loading-progress>
           </div>
         </div>
 
@@ -105,7 +108,7 @@ import { WalletService } from '../../services/wallet.service';
           <div class="flex justify-between items-center mb-4">
             <button
               hlmBtn
-              variant="outline"
+              variant="secondary"
               (click)="prevSlide()"
               [disabled]="currentSlide === 0"
               class="flex items-center space-x-2"
@@ -120,7 +123,7 @@ import { WalletService } from '../../services/wallet.service';
 
             <button
               hlmBtn
-              variant="outline"
+              variant="secondary"
               (click)="nextSlide()"
               [disabled]="currentSlide >= ((blocks$ | async)?.length || 0) - 1"
               class="flex items-center space-x-2"
@@ -329,6 +332,7 @@ export class BlockchainViewerComponent implements OnInit {
   loading$: Observable<boolean>;
   error$: Observable<string | null>;
   connected$: Observable<boolean>;
+  progress$: Observable<LoadingProgress>;
   currentSlide = 0;
   showDetails: boolean[] = [];
   Object = Object; // Make Object available in template
@@ -341,6 +345,7 @@ export class BlockchainViewerComponent implements OnInit {
     this.loading$ = this.blockchainService.loading$;
     this.error$ = this.blockchainService.error$;
     this.connected$ = this.walletService.connected$;
+    this.progress$ = this.blockchainService.progress$;
   }
 
   ngOnInit(): void {

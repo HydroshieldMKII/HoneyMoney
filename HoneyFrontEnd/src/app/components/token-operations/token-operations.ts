@@ -91,7 +91,7 @@ import { ToastService } from '../../services/toast.service';
             <button 
               hlmBtn 
               class="w-full"
-              variant="secondary"
+              variant="default"
               (click)="onMint()"
               [disabled]="loading$ | async"
             >

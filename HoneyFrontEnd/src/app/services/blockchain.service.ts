@@ -41,6 +41,12 @@ export interface DecodedTransaction {
   gasPrice: string;
 }
 
+export interface LoadingProgress {
+  currentBlock: number;
+  totalBlocks: number;
+  isLoading: boolean;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -66,10 +72,16 @@ export class BlockchainService {
   private blocksSubject = new BehaviorSubject<BlockData[]>([]);
   private loadingSubject = new BehaviorSubject<boolean>(false);
   private errorSubject = new BehaviorSubject<string | null>(null);
+  private progressSubject = new BehaviorSubject<LoadingProgress>({
+    currentBlock: 0,
+    totalBlocks: 0,
+    isLoading: false,
+  });
 
   public blocks$: Observable<BlockData[]> = this.blocksSubject.asObservable();
   public loading$: Observable<boolean> = this.loadingSubject.asObservable();
   public error$: Observable<string | null> = this.errorSubject.asObservable();
+  public progress$: Observable<LoadingProgress> = this.progressSubject.asObservable();
 
   constructor(
     private walletService: WalletService,
@@ -91,13 +103,28 @@ async loadBlocks(): Promise<void> {
 
   try {
     const latest = await provider.getBlockNumber();
+    const totalBlocks = latest + 1;
     const blocks: BlockData[] = [];
+
+    // Initialize progress
+    this.progressSubject.next({
+      currentBlock: 0,
+      totalBlocks,
+      isLoading: true,
+    });
 
     // Update loading message with progress
     this.toastService.dismiss(loadingToastId);
-    const progressToastId = this.toastService.loading(`Loading ${latest + 1} blocks...`, 'This may take a few seconds');
+    const progressToastId = this.toastService.loading(`Loading ${totalBlocks} blocks...`, 'This may take a few seconds');
 
     for (let i = 0; i <= latest; i++) {
+      // Update progress before loading each block
+      this.progressSubject.next({
+        currentBlock: i,
+        totalBlocks,
+        isLoading: true,
+      });
+
       const block = await provider.send("eth_getBlockByNumber", [
         toBeHex(i),
         true,
@@ -119,10 +146,24 @@ async loadBlocks(): Promise<void> {
       }
       
       blocks.push(this.formatBlockData(block));
+
+      // Update progress after loading each block
+      this.progressSubject.next({
+        currentBlock: i + 1,
+        totalBlocks,
+        isLoading: true,
+      });
     }
 
     console.log('Loaded blocks:', blocks.length, 'latest block number:', latest);
     this.blocksSubject.next(blocks);
+    
+    // Complete progress
+    this.progressSubject.next({
+      currentBlock: totalBlocks,
+      totalBlocks,
+      isLoading: false,
+    });
     
     // Update to success toast
     this.toastService.updateToast(
@@ -136,6 +177,13 @@ async loadBlocks(): Promise<void> {
     console.error('Error loading blocks:', error);
     const errorMessage = `Failed to load blocks: ${error.message}`;
     this.errorSubject.next(errorMessage);
+    
+    // Reset progress on error
+    this.progressSubject.next({
+      currentBlock: 0,
+      totalBlocks: 0,
+      isLoading: false,
+    });
     
     // Update to error toast
     this.toastService.updateToast(

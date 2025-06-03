@@ -2,21 +2,19 @@
 @import "tailwindcss";
 @import "@spartan-ng/brain/hlm-tailwind-preset.css";
 
-/* Bee-themed color palette */
+
 :root {
-  /* Honey & Bee inspired colors */
-  --honey-light: 45 100% 85%;     /* Light honey */
-  --honey: 45 100% 70%;           /* Golden honey */
-  --honey-dark: 35 80% 45%;       /* Dark honey */
-  --amber: 42 100% 60%;           /* Amber */
-  --amber-dark: 38 90% 40%;       /* Dark amber */
-  --bee-black: 30 15% 8%;         /* Bee black */
-  --bee-yellow: 52 100% 50%;      /* Bee yellow */
-  --pollen: 58 100% 85%;          /* Light pollen yellow */
-  --honeycomb: 45 50% 95%;        /* Very light honeycomb */
-  --hive-brown: 25 40% 25%;       /* Hive brown */
+  --honey-light: 45 100% 85%;  
+  --honey: 45 100% 70%;        
+  --honey-dark: 35 80% 45%;      
+  --amber: 42 100% 60%;        
+  --amber-dark: 38 90% 40%;     
+  --bee-black: 30 15% 8%;     
+  --bee-yellow: 52 100% 50%;
+  --pollen: 58 100% 85%;
+  --honeycomb: 45 50% 95%;
+  --hive-brown: 25 40% 25%; 
   
-  /* Updated theme variables with bee theme */
   --background: var(--honeycomb);
   --foreground: var(--bee-black);
   --card: 45 60% 98%;
@@ -42,7 +40,6 @@
 }
 
 .dark {
-  /* Dark theme with bee colors */
   --background: 30 20% 8%;
   --foreground: var(--honey-light);
   --card: 30 25% 12%;
@@ -76,7 +73,7 @@
     font-family: 'Inter', 'system-ui', sans-serif;
   }
   
-  /* Honeycomb pattern background */
+
   body::before {
     content: '';
     position: fixed;
@@ -93,7 +90,7 @@
     z-index: -1;
   }
   
-  /* Bee-themed button styles */
+
   button {
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -106,7 +103,7 @@
     box-shadow: 0 8px 25px hsla(var(--honey), 0.3);
   }
   
-  /* Honey drip animation for primary buttons */
+
   button[variant="default"]::before {
     content: '';
     position: absolute;
@@ -123,9 +120,7 @@
   }
 }
 
-/* Custom bee-themed components */
 @layer components {
-  /* Honeycomb card style */
   .bee-card {
     background: linear-gradient(145deg, hsl(var(--card)), hsl(var(--honey-light)));
     border: 2px solid hsl(var(--honey));
@@ -143,7 +138,6 @@
     opacity: 0.6;
   }
   
-  /* Bee-themed input styles */
   .bee-input {
     background: hsl(var(--input));
     border: 2px solid hsl(var(--honey));
@@ -157,7 +151,6 @@
     background: hsl(var(--honeycomb));
   }
   
-  /* Bee animation */
   @keyframes bee-flight {
     0%, 100% { transform: translateX(0) rotate(0deg); }
     25% { transform: translateX(10px) rotate(5deg); }
@@ -170,7 +163,6 @@
     display: inline-block;
   }
   
-  /* Honey loading animation */
   @keyframes honey-drip {
     0% { transform: translateY(-20px); opacity: 0; }
     50% { opacity: 1; }
@@ -187,7 +179,6 @@
     animation: honey-drip 1.5s ease-in-out infinite;
   }
   
-  /* Blockchain/hive pattern */
   .hive-pattern {
     background-image: 
       repeating-linear-gradient(
@@ -206,7 +197,6 @@
       );
   }
   
-  /* Bee-themed toasts */
   [data-sonner-toaster] {
     --normal-bg: hsl(var(--card));
     --normal-border: hsl(var(--honey));
@@ -219,7 +209,6 @@
     --error-text: hsl(0 84.2% 30%);
   }
   
-  /* Hexagonal elements */
   .hexagon {
     width: 100px;
     height: 55px;
@@ -248,7 +237,7 @@
   }
 }
 
-/* Bee-themed scrollbar */
+
 @layer utilities {
   ::-webkit-scrollbar {
     width: 12px;
@@ -270,7 +259,7 @@
   }
 }
 
-/* Dark mode adjustments */
+
 .dark body {
   background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(30 25% 12%) 100%);
 }

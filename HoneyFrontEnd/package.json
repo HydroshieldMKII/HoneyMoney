@@ -23,6 +23,8 @@
     "@tailwindcss/postcss": "^4.1.8",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "ethers": "^6.14.3",
+    "ngx-sonner": ">=3.0.0",
     "postcss": "^8.5.4",
     "rxjs": "~7.8.0",
     "tailwindcss": "^4.1.8",

@@ -8,7 +8,7 @@
   },
   "include": [
     "src/**/*.ts"
-  ],
+, "src/app/components/wallet-info"  ],
   "exclude": [
     "src/**/*.spec.ts"
   ]

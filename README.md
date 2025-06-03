@@ -170,8 +170,10 @@ Ce projet permet d'explorer une technologie révolutionnaire qui transforme déj
 - [Ethers.js](https://docs.ethers.org/v6/)
 - [Solidity](https://docs.soliditylang.org/en/v0.8.30/)
 - [OpenZeppelin ERC20](https://docs.openzeppelin.com/contracts/4.x/erc20-supply)
+- [Hardhat](https://hardhat.org/docs)
 
 # Problèmes rencontrés
-- Déploiement du contrat avec Hardhat sur un domaine (RPC autre domaine)
-- Gestion des array en Solidity
+- Déploiement du contrat avec Hardhat sur un domaine
 - Configuration des scripts (Disable automine)
+- Gestion des array en Solidity
+- Récupération des blocks complets sur la blockchain

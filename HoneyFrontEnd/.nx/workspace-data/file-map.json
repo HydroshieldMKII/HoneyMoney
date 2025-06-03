@@ -1,0 +1,286 @@
+{
+  "version": "6.0",
+  "nxVersion": "21.1.2",
+  "pathMappings": {
+    "@spartan-ng/helm/button": [
+      "./libs/ui/ui-button-helm/src/index.ts"
+    ],
+    "@spartan-ng/helm/alert": [
+      "./libs/ui/ui-alert-helm/src/index.ts"
+    ],
+    "@spartan-ng/helm/icon": [
+      "./libs/ui/ui-icon-helm/src/index.ts"
+    ],
+    "@spartan-ng/helm/command": [
+      "./libs/ui/ui-command-helm/src/index.ts"
+    ],
+    "@spartan-ng/helm/card": [
+      "./libs/ui/ui-card-helm/src/index.ts"
+    ],
+    "@spartan-ng/helm/switch": [
+      "./libs/ui/ui-switch-helm/src/index.ts"
+    ]
+  },
+  "nxJsonPlugins": [],
+  "fileMap": {
+    "projectFileMap": {},
+    "nonProjectFiles": [
+      {
+        "file": ".editorconfig",
+        "hash": "4165385352547808172"
+      },
+      {
+        "file": ".gitignore",
+        "hash": "18168400278403753650"
+      },
+      {
+        "file": ".postcssrc.json",
+        "hash": "4514020240271989700"
+      },
+      {
+        "file": ".vscode/extensions.json",
+        "hash": "5331566439708925252"
+      },
+      {
+        "file": ".vscode/launch.json",
+        "hash": "17038929134016848735"
+      },
+      {
+        "file": ".vscode/tasks.json",
+        "hash": "5336636969995539451"
+      },
+      {
+        "file": "README.md",
+        "hash": "11580129295895845878"
+      },
+      {
+        "file": "angular.json",
+        "hash": "110608980160372590"
+      },
+      {
+        "file": "components.json",
+        "hash": "3089158842223537119"
+      },
+      {
+        "file": "libs/ui/ui-alert-helm/src/index.ts",
+        "hash": "3791802788218093072"
+      },
+      {
+        "file": "libs/ui/ui-alert-helm/src/lib/hlm-alert-description.directive.ts",
+        "hash": "10054372904229832760"
+      },
+      {
+        "file": "libs/ui/ui-alert-helm/src/lib/hlm-alert-icon.directive.ts",
+        "hash": "11283496371491006911"
+      },
+      {
+        "file": "libs/ui/ui-alert-helm/src/lib/hlm-alert-title.directive.ts",
+        "hash": "6737690058252919623"
+      },
+      {
+        "file": "libs/ui/ui-alert-helm/src/lib/hlm-alert.directive.ts",
+        "hash": "6674817542479002104"
+      },
+      {
+        "file": "libs/ui/ui-button-helm/src/index.ts",
+        "hash": "17251273102492170138"
+      },
+      {
+        "file": "libs/ui/ui-button-helm/src/lib/hlm-button.directive.ts",
+        "hash": "11068329498313394712"
+      },
+      {
+        "file": "libs/ui/ui-button-helm/src/lib/hlm-button.token.ts",
+        "hash": "7896754714560199098"
+      },
+      {
+        "file": "libs/ui/ui-card-helm/src/index.ts",
+        "hash": "16562238750490677596"
+      },
+      {
+        "file": "libs/ui/ui-card-helm/src/lib/hlm-card-content.directive.ts",
+        "hash": "14120040773416496629"
+      },
+      {
+        "file": "libs/ui/ui-card-helm/src/lib/hlm-card-description.directive.ts",
+        "hash": "11379924620899130749"
+      },
+      {
+        "file": "libs/ui/ui-card-helm/src/lib/hlm-card-footer.directive.ts",
+        "hash": "10967238700823552868"
+      },
+      {
+        "file": "libs/ui/ui-card-helm/src/lib/hlm-card-header.directive.ts",
+        "hash": "15901871804019604030"
+      },
+      {
+        "file": "libs/ui/ui-card-helm/src/lib/hlm-card-title.directive.ts",
+        "hash": "12874525138222134681"
+      },
+      {
+        "file": "libs/ui/ui-card-helm/src/lib/hlm-card.directive.ts",
+        "hash": "17507123041101396637"
+      },
+      {
+        "file": "libs/ui/ui-command-helm/src/index.ts",
+        "hash": "15855819063071434966"
+      },
+      {
+        "file": "libs/ui/ui-command-helm/src/lib/hlm-command-dialog-close-button.directive.ts",
+        "hash": "1731301131135369150"
+      },
+      {
+        "file": "libs/ui/ui-command-helm/src/lib/hlm-command-dialog.directive.ts",
+        "hash": "9215644653870039087"
+      },
+      {
+        "file": "libs/ui/ui-command-helm/src/lib/hlm-command-empty.directive.ts",
+        "hash": "8111130069470751617"
+      },
+      {
+        "file": "libs/ui/ui-command-helm/src/lib/hlm-command-group-label.component.ts",
+        "hash": "11264382072370824387"
+      },
+      {
+        "file": "libs/ui/ui-command-helm/src/lib/hlm-command-group.component.ts",
+        "hash": "2062542344122873045"
+      },
+      {
+        "file": "libs/ui/ui-command-helm/src/lib/hlm-command-icon.directive.ts",
+        "hash": "16472207323525736958"
+      },
+      {
+        "file": "libs/ui/ui-command-helm/src/lib/hlm-command-item.component.ts",
+        "hash": "3783598908053304159"
+      },
+      {
+        "file": "libs/ui/ui-command-helm/src/lib/hlm-command-list.component.ts",
+        "hash": "2853929450280399948"
+      },
+      {
+        "file": "libs/ui/ui-command-helm/src/lib/hlm-command-search-input.component.ts",
+        "hash": "4032697682195670131"
+      },
+      {
+        "file": "libs/ui/ui-command-helm/src/lib/hlm-command-search.component.ts",
+        "hash": "2784859021039543418"
+      },
+      {
+        "file": "libs/ui/ui-command-helm/src/lib/hlm-command-separator.component.ts",
+        "hash": "1830235215698786111"
+      },
+      {
+        "file": "libs/ui/ui-command-helm/src/lib/hlm-command-shortcut.component.ts",
+        "hash": "14373998140443781865"
+      },
+      {
+        "file": "libs/ui/ui-command-helm/src/lib/hlm-command.component.ts",
+        "hash": "8843172817000952900"
+      },
+      {
+        "file": "libs/ui/ui-icon-helm/src/index.ts",
+        "hash": "13072002477516072914"
+      },
+      {
+        "file": "libs/ui/ui-icon-helm/src/lib/hlm-icon.directive.ts",
+        "hash": "1190767095705292823"
+      },
+      {
+        "file": "libs/ui/ui-icon-helm/src/lib/hlm-icon.token.ts",
+        "hash": "1780499468245078594"
+      },
+      {
+        "file": "libs/ui/ui-switch-helm/src/index.ts",
+        "hash": "4397783043409069349"
+      },
+      {
+        "file": "libs/ui/ui-switch-helm/src/lib/hlm-switch-thumb.directive.ts",
+        "hash": "22823153044774548"
+      },
+      {
+        "file": "libs/ui/ui-switch-helm/src/lib/hlm-switch.component.ts",
+        "hash": "6021207681979836935"
+      },
+      {
+        "file": "package-lock.json",
+        "hash": "4483098195916822436"
+      },
+      {
+        "file": "package.json",
+        "hash": "8223957728478634221"
+      },
+      {
+        "file": "public/favicon.ico",
+        "hash": "3988961587069885523"
+      },
+      {
+        "file": "src/app/app.config.ts",
+        "hash": "11364722301963577824"
+      },
+      {
+        "file": "src/app/app.css",
+        "hash": "3244421341483603138"
+      },
+      {
+        "file": "src/app/app.html",
+        "hash": "6930976854909823610"
+      },
+      {
+        "file": "src/app/app.routes.ts",
+        "hash": "12397496131277534773"
+      },
+      {
+        "file": "src/app/app.ts",
+        "hash": "6982033967017076873"
+      },
+      {
+        "file": "src/app/contract-details/contract-details.css",
+        "hash": "3244421341483603138"
+      },
+      {
+        "file": "src/app/contract-details/contract-details.html",
+        "hash": "3166882515561672058"
+      },
+      {
+        "file": "src/app/contract-details/contract-details.ts",
+        "hash": "8014104219742366929"
+      },
+      {
+        "file": "src/app/wallet-details/wallet-details.css",
+        "hash": "3244421341483603138"
+      },
+      {
+        "file": "src/app/wallet-details/wallet-details.html",
+        "hash": "13396412213350645311"
+      },
+      {
+        "file": "src/app/wallet-details/wallet-details.ts",
+        "hash": "3735318118592913204"
+      },
+      {
+        "file": "src/index.html",
+        "hash": "17918173000582236401"
+      },
+      {
+        "file": "src/main.ts",
+        "hash": "15944248449879998907"
+      },
+      {
+        "file": "src/styles.css",
+        "hash": "785928737299692760"
+      },
+      {
+        "file": "tsconfig.app.json",
+        "hash": "8369321240499881643"
+      },
+      {
+        "file": "tsconfig.json",
+        "hash": "9404660687628592110"
+      },
+      {
+        "file": "tsconfig.spec.json",
+        "hash": "647795770471502525"
+      }
+    ]
+  }
+}

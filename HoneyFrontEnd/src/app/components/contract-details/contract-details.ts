@@ -9,6 +9,9 @@ import {
   HlmCardTitleDirective,
 } from '@spartan-ng/helm/card';
 
+import { HlmSpinnerComponent } from '@spartan-ng/helm/spinner';
+
+
 @Component({
   selector: 'app-contract-details',
   imports: [
@@ -16,12 +19,12 @@ import {
     HlmCardHeaderDirective,
     HlmCardTitleDirective,
     HlmCardDescriptionDirective,
-    HlmCardContentDirective,
-    HlmCardFooterDirective
+    HlmCardContentDirective
   ],
   templateUrl: './contract-details.html',
   styleUrl: './contract-details.css'
 })
+
 export class ContractDetails {
 
 }

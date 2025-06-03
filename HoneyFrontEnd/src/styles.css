@@ -56,9 +56,15 @@
   color-scheme: dark;
 }
 
-/* ...existing code... */
-
 @layer base {
+    body {
+        /*font-family: 'Inter', sans-serif; /* Default font */
+        background-color: hsl(var(--background));
+        color: hsl(var(--foreground));
+        margin: 0;
+        padding: 0;
+        line-height: 1.5;
+    }
     button {
         cursor: pointer; /* Show pointer on hover/click */
         transition: background 0.2s, color 0.2s;

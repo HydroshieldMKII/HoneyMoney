@@ -29,6 +29,10 @@ contract HoneyMoney is ERC20 {
         paused = !paused;
     }
 
+    function getContractAddress() public view returns (address) {
+        return address(this);
+    }
+
     function getOwner() public view returns (address) {
         return owner;
     }

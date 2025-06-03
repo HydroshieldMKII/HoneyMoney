@@ -82,6 +82,23 @@ button {
   }
 }
 
+#blockchainCarousel .carousel-item { padding: 1rem 0; }
+#blockchainCarousel .blocks-row   { gap: 1rem; }
+
+@media (min-width: 768px) {
+    #blockchainCarousel .col-block { flex: 0 0 48%; }
+}
+
+/* Position carousel arrows further to the sides */
+#blockchainCarousel .carousel-control-prev {
+    left: -150px;
+}
+
+#blockchainCarousel .carousel-control-next {
+    right: -150px;
+}
+
+
     </style>
 </head>
 
@@ -94,7 +111,7 @@ button {
         <div class="card mb-4">
             <div class="card-body">
                 <button class="btn btn-primary mb-3" id="connect">Connect Wallet</button>
-                <h3><strong>Your wallet details</strong></h3>
+                <h3><strong>== Your wallet details ==</strong></h3>
                 <p><strong>Wallet address:</strong> <span id="wallet" class="text-monospace">Not connected</span></p>
                 <p><strong>Balance:</strong> <span id="balance">?</span> BEE</p>
             </div>
@@ -102,8 +119,9 @@ button {
 
         <div class="card mb-4">
                 <div class="card-body">
-                    <h2>HoneyMoney Contract</h2>
+                    <h3><strong>== Honey Money contract ==</strong></h3>
                     <p><strong>Total Supply:</strong> <span id="totalSupply">Unknown</span> BEE</p>
+                    <p><strong>Contract Address:</strong> <span id="contractAddress" class="text-monospace">Unknown</span></p>
                     <p><strong>Contract Owner:</strong> <span id="contractOwner" class="text-monospace">Unknown</span></p>
                     <p><strong>Pause State:</strong> <span id="pauseState">Unknown</span></p>
                     <button class="btn btn-primary" id="togglePause">Pause / enable</button>
@@ -168,7 +186,25 @@ button {
 
 <div class="container">
   <h2>Live Blockchain Explorer</h2>
-  <div id="blockchain-container"></div>
+  <div id="blockchainCarousel"
+     class="carousel slide"
+     data-bs-touch="true"
+     data-bs-ride="false">   <!-- we advance with arrows only -->
+  <div class="carousel-inner"></div>
+
+  <!-- navigation arrows -->
+  <button class="carousel-control-prev" type="button"
+          data-bs-target="#blockchainCarousel" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+  </button>
+
+  <button class="carousel-control-next" type="button"
+          data-bs-target="#blockchainCarousel" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+  </button>
+</div>
 </div>
 
 

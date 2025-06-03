@@ -13,6 +13,7 @@ const tokenABI = [
   "function togglePause()",
   "function isPaused() view returns (bool)",
   "function getOwner() view returns (address)",
+  "function getContractAddress() view returns (address)",
   "function totalSupply() view returns (uint)",
 ];
 
@@ -103,162 +104,179 @@ const computeEthereumBlockHash = async (block) => {
 };
 
 const loadRealBlocksWithFullHeader = async () => {
-  let blockNumber = 0;
+  const latest = await provider.getBlockNumber(); // real height
   const blocks = [];
 
-  while (true) {
-    try {
-      const hexBlockNumber = ethers.utils.hexValue(blockNumber);
-      const block = await provider.send("eth_getBlockByNumber", [
-        hexBlockNumber,
+  for (let i = 0; i <= latest; i++) {
+    blocks.push(
+      await provider.send("eth_getBlockByNumber", [
+        ethers.utils.hexValue(i),
         true,
-      ]);
-      if (!block || !block.hash) {
-        console.error(`Invalid block #: ${blockNumber}`, block);
-        break;
-      }
-      blocks.push(block);
-      blockNumber++;
-    } catch (e) {
-      console.error("Error fetching block:", e);
-      break;
-    }
-  }
-
-  const latestBlockNumber = await provider.getBlockNumber();
-  console.log("Current block number:", latestBlockNumber);
-
-  console.log("Loaded blocks:", blocks);
-  renderBlockchain(blocks);
-};
-
-
-const renderBlockchain = (blocks) => {
-  const container = document.getElementById("blockchain-container");
-  container.innerHTML = "";
-
-  blocks.forEach((block, idx) => {
-    const blockDiv = document.createElement("div");
-    blockDiv.className = "block p-3 mb-3 border rounded bg-light";
-
-    const blockNumber = parseInt(block.number, 16);
-    const timestamp = new Date(
-      parseInt(block.timestamp, 16) * 1000
-    ).toISOString();
-
-    // Parse transaction data (like in your earlier code)
-    let functionName = "N/A";
-    let from = "N/A";
-    let to = "N/A";
-    if (block.transactions && block.transactions.length > 0) {
-      const tx = block.transactions[0];
-      from = tx.from;
-      to = tx.to;
-      const iface = new ethers.utils.Interface(tokenABI);
-      try {
-        const parsedTx = iface.parseTransaction({
-          data: tx.input,
-          value: tx.value,
-        });
-        functionName = parsedTx.name;
-      } catch (err) {
-        functionName = "Unknown or Constructor";
-      }
-    }
-
-    blockDiv.innerHTML = `
-    <div><label>Block #:</label><input class="form-control form-control-sm mb-2 block-number" value="${blockNumber}"></div>
-    <div><label>Timestamp:</label><input class="form-control form-control-sm mb-2 timestamp" value="${timestamp}"></div>
-    <div><label>Miner:</label><input class="form-control form-control-sm mb-2 miner" value="${block.miner}"></div>
-    <div><label>Parent Hash:</label><input class="form-control form-control-sm mb-2 parent-hash" value="${block.parentHash}"></div>
-    <div><label>Blockchain Hash:</label><input class="form-control form-control-sm mb-2 hash" value="${block.hash || "N/A"}"></div>
-    <div class="mt-2"><strong>Decoded Transaction:</strong></div>
-    <div><label>Function:</label><input class="form-control form-control-sm mb-2" value="${functionName}"></div>
-    <div><label>From:</label><input class="form-control form-control-sm mb-2" value="${from}"></div>
-    <div><label>To (Contract):</label><input class="form-control form-control-sm mb-2" value="${to}"></div>
-    `;
-
-
-    container.appendChild(blockDiv);
-  });
-
-  const blocksDivs = container.querySelectorAll(".block");
-
-// helper: turn a card into a minimal header object
-function headerFromCard(div, originalHeader) {
-  return {
-    ...originalHeader,                           // untouched fields
-    parentHash : div.querySelector(".parent-hash").value,
-    miner      : div.querySelector(".miner").value,
-    number     : +div.querySelector(".block-number").value,
-    timestamp  : Math.floor(
-                   new Date(div.querySelector(".timestamp").value).getTime()/1000
-                 )
-  };
-}
-
-const recalculateAndValidate = async (e) => {
-  // index of the card whose <input> actually fired the event
-  const editedCard   = e ? [...blocksDivs].indexOf(e.currentTarget.closest('.block'))
-                         : -1;
-
-  /* 1. First pass – re-hash everything, but do NOT write back */
-  const newHashes = [];
-  for (let i = 0; i < blocksDivs.length; i++) {
-    newHashes[i] = await computeEthereumBlockHash(
-      headerFromCard(blocksDivs[i], blocks[i])
+      ])
     );
   }
 
-  /* 2. Second pass – overwrite hash field only for the edited card and all that follow */
-  if (editedCard >= 0) {
-    for (let i = editedCard; i < blocksDivs.length; i++) {
-      blocksDivs[i].querySelector('.hash').value = newHashes[i];
-    }
-  }
-
-  /* 3. Validation colouring */
-for (let i = 0; i < blocksDivs.length; i++) {
-  const card = blocksDivs[i];
-
-  if (i === 0) {                      // genesis / first loaded card
-    card.classList.remove('bg-danger');
-    card.classList.add   ('bg-light');
-    continue;
-  }
-
-  /* use the HASH VALUE CURRENTLY DISPLAYED in the previous card */
-  const prevHashDOM = blocksDivs[i - 1]
-                        .querySelector('.hash').value.trim();
-  const parentHash  = card.querySelector('.parent-hash').value.trim();
-
-  if (parentHash !== prevHashDOM) {
-    card.classList.add   ('bg-danger');
-    card.classList.remove('bg-light');
-  } else {
-    card.classList.remove('bg-danger');
-    card.classList.add   ('bg-light');
-  }
-}
+  console.log("Loaded blocks: ", blocks.length, "latest block number=", latest);
+  renderBlockchain(blocks);
 };
 
-/* attach listener */
-blocksDivs.forEach(div => {
-  div.querySelectorAll('input').forEach(inp => {
-    inp.addEventListener('input', recalculateAndValidate);
+/* -----------------------------------------------------------------
+   Render blocks as a Bootstrap-5 carousel, two blocks per slide
+   -----------------------------------------------------------------*/
+const renderBlockchain = (blocks) => {
+  /* -------- 1.  grab the carousel body and wipe previous slides --- */
+  const carouselInner = document.querySelector(
+    "#blockchainCarousel .carousel-inner"
+  );
+  carouselInner.innerHTML = "";
+
+  /* -------- 2. helper – create ONE <div class="block"> card ------- */
+  const buildCard = (block) => {
+    const div = document.createElement("div");
+    div.className = "block p-3 border rounded bg-light";
+
+    const bn = parseInt(block.number, 16);
+    const timestamp = new Date(
+      parseInt(block.timestamp, 16) * 1_000
+    ).toISOString();
+
+    // simple decode of the *first* tx, same as before
+    let fn = "N/A",
+      from = "N/A",
+      to = "N/A";
+    if (block.transactions?.length) {
+      const tx = block.transactions[0];
+      from = tx.from;
+      to = tx.to;
+      try {
+        fn = new ethers.utils.Interface(tokenABI).parseTransaction({
+          data: tx.input,
+          value: tx.value,
+        }).name;
+      } catch (_) {
+        fn = "Constructor";
+      }
+    }
+
+    div.innerHTML = `
+      <div><label>Block #:</label>
+           <input class="form-control form-control-sm mb-2 block-number"
+                  value="${bn}"></div>
+      <div><label>Timestamp:</label>
+           <input class="form-control form-control-sm mb-2 timestamp"
+                  value="${timestamp}"></div>
+      <div><label>Miner:</label>
+           <input class="form-control form-control-sm mb-2 miner"
+                  value="${block.miner}"></div>
+      <div><label>Parent Hash:</label>
+           <input class="form-control form-control-sm mb-2 parent-hash bg-warning"
+                  value="${block.parentHash}"></div>
+      <div><label>Blockchain Hash:</label>
+           <input class="form-control form-control-sm mb-2 hash bg-warning"
+                  value="${block.hash || "N/A"}"></div>
+
+      <div class="mt-2"><strong>Decoded Transaction:</strong></div>
+      <div><label>Function:</label>
+           <input class="form-control form-control-sm mb-2"
+                  value="${fn}"></div>
+      <div><label>From:</label>
+           <input class="form-control form-control-sm mb-2"
+                  value="${from}"></div>
+      <div><label>To (Contract):</label>
+           <input class="form-control form-control-sm mb-2"
+                  value="${to}"></div>`;
+    return div;
+  };
+
+  /* -------- 3. chunk blocks array → slides (2 per slide) ---------- */
+  for (let i = 0; i < blocks.length; i += 2) {
+    const slide = document.createElement("div");
+    slide.className = "carousel-item" + (i === 0 ? " active" : "");
+
+    const row = document.createElement("div");
+    row.className = "d-flex flex-wrap justify-content-center blocks-row";
+
+    const col1 = document.createElement("div");
+    col1.className = "col-block";
+    col1.appendChild(buildCard(blocks[i]));
+    row.appendChild(col1);
+
+    if (blocks[i + 1]) {
+      const col2 = document.createElement("div");
+      col2.className = "col-block";
+      col2.appendChild(buildCard(blocks[i + 1]));
+      row.appendChild(col2);
+    }
+
+    slide.appendChild(row);
+    carouselInner.appendChild(slide);
+  }
+
+  /* -------- 4.  wiring up live-edit → re-hash / validation -------- */
+
+  const blocksDivs = carouselInner.querySelectorAll(".block");
+
+  // minimal header for hashing
+  const headerFromCard = (div, original) => ({
+    ...original,
+    parentHash: div.querySelector(".parent-hash").value,
+    miner: div.querySelector(".miner").value,
+    number: +div.querySelector(".block-number").value,
+    timestamp: Math.floor(
+      new Date(div.querySelector(".timestamp").value).getTime() / 1_000
+    ),
   });
-});
 
+  const recalculateAndValidate = async (e) => {
+    const editedIdx = e
+      ? [...blocksDivs].indexOf(e.currentTarget.closest(".block"))
+      : -1;
 
+    // 1. recompute *all* hashes first
+    const freshHashes = [];
+    for (let i = 0; i < blocksDivs.length; i++) {
+      freshHashes[i] = await computeEthereumBlockHash(
+        headerFromCard(blocksDivs[i], blocks[i])
+      );
+    }
 
-//   // Attach event listeners to inputs
-//   blocksDivs.forEach((blockDiv) => {
-//     console.log(`Attaching input listeners to block div ${blockDiv.querySelector(".block-number").value}`);
-//     const inputs = blockDiv.querySelectorAll("input");
-//     inputs.forEach((input) => {
-//       input.addEventListener("input", recalculateAndValidate);
-//     });
-//   });
+    // 2. push new hashes into DOM from edited card onward
+    if (editedIdx >= 0) {
+      for (let i = editedIdx; i < blocksDivs.length; i++) {
+        blocksDivs[i].querySelector(".hash").value = freshHashes[i];
+      }
+    }
+
+    // 3. colour cards green/red depending on parent-hash linkage
+    for (let i = 0; i < blocksDivs.length; i++) {
+      const card = blocksDivs[i];
+
+      if (i === 0) {
+        // first card = genesis of view
+        card.classList.remove("bg-danger");
+        card.classList.add("bg-light");
+        continue;
+      }
+
+      const prevHash = blocksDivs[i - 1].querySelector(".hash").value.trim();
+      const parent = card.querySelector(".parent-hash").value.trim();
+
+      if (parent !== prevHash) {
+        card.classList.add("bg-danger");
+        card.classList.remove("bg-light");
+      } else {
+        card.classList.remove("bg-danger");
+        card.classList.add("bg-light");
+      }
+    }
+  };
+
+  // attach listeners to every <input> inside every card
+  blocksDivs.forEach((div) =>
+    div
+      .querySelectorAll("input")
+      .forEach((inp) => inp.addEventListener("input", recalculateAndValidate))
+  );
 };
 
 // -------------------- STATE UPDATES --------------------
@@ -346,10 +364,21 @@ const updateLeaderboard = async () => {
   });
 };
 
+const updateContractAddress = async () => {
+  try {
+    const address = await token.getContractAddress();
+    document.getElementById("contractAddress").innerText = address;
+  } catch (err) {
+    console.error("Error fetching contract address:", err);
+    document.getElementById("contractAddress").innerText = "Error";
+  }
+};
+
 // -------------------- ACTION HANDLERS --------------------
 const handleTransaction = async (action, successMsg) => {
   try {
     const tx = await action();
+    // await provider.send("evm_mine", []);
     await tx.wait();
     showToast(successMsg, "success");
     const address = await signer.getAddress();
@@ -381,6 +410,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await updateBalance(address);
     await updateLeaderboard();
     await loadRealBlocksWithFullHeader();
+    await updateContractAddress();
 
     document.getElementById("connect").style.display = "none";
   } else {
@@ -402,6 +432,8 @@ document.getElementById("connect").onclick = async () => {
   await updatePauseState();
   await updateBalance(address);
   await updateLeaderboard();
+  await loadRealBlocksWithFullHeader();
+  await updateContractAddress();
 };
 
 document.getElementById("togglePause").onclick = () =>

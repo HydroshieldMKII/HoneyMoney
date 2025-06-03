@@ -124,13 +124,11 @@ const loadRealBlocksWithFullHeader = async () => {
    Render blocks as a Bootstrap-5 carousel, two blocks per slide
    -----------------------------------------------------------------*/
 const renderBlockchain = (blocks) => {
-  /* -------- 1.  grab the carousel body and wipe previous slides --- */
   const carouselInner = document.querySelector(
     "#blockchainCarousel .carousel-inner"
   );
   carouselInner.innerHTML = "";
 
-  /* -------- 2. helper – create ONE <div class="block"> card ------- */
   const buildCard = (block) => {
     const div = document.createElement("div");
     div.className = "block p-3 border rounded bg-light";
@@ -140,7 +138,7 @@ const renderBlockchain = (blocks) => {
       parseInt(block.timestamp, 16) * 1_000
     ).toISOString();
 
-    // simple decode of the *first* tx, same as before
+
 let fn = "N/A", from = "N/A", to = "N/A", decodedArgs = "";
 
 if (block.transactions?.length) {
@@ -156,12 +154,12 @@ if (block.transactions?.length) {
     });
     fn = parsed.name;
 
-    // Show each argument with its name or index
+
 decodedArgs = Object.entries(parsed.args)
   .filter(([k]) => isNaN(k)) // skip numeric indexes
   .map(([key, value]) => {
     if (key.toLowerCase().includes("amount") || key.toLowerCase().includes("value")) {
-      // Format amount to human-readable (assumes 18 decimals)
+      // Format amount to human-readable
       value = (ethers.utils.formatUnits(value, 18)) + " tokens";
     }
     return `<div><b>${key}:</b> ${value}</div>`;
@@ -206,7 +204,6 @@ decodedArgs = Object.entries(parsed.args)
     return div;
   };
 
-  /* -------- 3. chunk blocks array → slides (2 per slide) ---------- */
   for (let i = 0; i < blocks.length; i += 2) {
     const slide = document.createElement("div");
     slide.className = "carousel-item" + (i === 0 ? " active" : "");
@@ -230,8 +227,6 @@ decodedArgs = Object.entries(parsed.args)
     carouselInner.appendChild(slide);
   }
 
-  /* -------- 4.  wiring up live-edit → re-hash / validation -------- */
-
   const blocksDivs = carouselInner.querySelectorAll(".block");
 
   // minimal header for hashing
@@ -250,7 +245,6 @@ decodedArgs = Object.entries(parsed.args)
       ? [...blocksDivs].indexOf(e.currentTarget.closest(".block"))
       : -1;
 
-    // 1. recompute *all* hashes first
     const freshHashes = [];
     for (let i = 0; i < blocksDivs.length; i++) {
       freshHashes[i] = await computeEthereumBlockHash(
@@ -258,14 +252,12 @@ decodedArgs = Object.entries(parsed.args)
       );
     }
 
-    // 2. push new hashes into DOM from edited card onward
     if (editedIdx >= 0) {
       for (let i = editedIdx; i < blocksDivs.length; i++) {
         blocksDivs[i].querySelector(".hash").value = freshHashes[i];
       }
     }
 
-    // 3. colour cards green/red depending on parent-hash linkage
     for (let i = 0; i < blocksDivs.length; i++) {
       const card = blocksDivs[i];
 
@@ -289,7 +281,6 @@ decodedArgs = Object.entries(parsed.args)
     }
   };
 
-  // attach listeners to every <input> inside every card
   blocksDivs.forEach((div) =>
     div
       .querySelectorAll("input")

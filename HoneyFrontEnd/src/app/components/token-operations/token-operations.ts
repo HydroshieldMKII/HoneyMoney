@@ -13,6 +13,7 @@ import {
 import { HlmButtonDirective } from '@spartan-ng/helm/button';
 import { TokenService } from '../../services/token.service';
 import { WalletService } from '../../services/wallet.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-token-operations',
@@ -206,10 +207,12 @@ export class TokenOperationsComponent {
 
   constructor(
     private tokenService: TokenService,
-    private walletService: WalletService
+    private walletService: WalletService,
+    private toastService: ToastService
   ) {
     this.connected$ = this.walletService.connected$;
     this.loading$ = this.tokenService.loading$;
+
   }
 
   isUserOwner(): boolean {
@@ -218,13 +221,14 @@ export class TokenOperationsComponent {
 
   async onSend(): Promise<void> {
     if (!this.sendForm.recipient || !this.sendForm.amount) {
+      this.toastService.error('Please fill in all fields');
       return;
     }
 
     try {
       await this.tokenService.transfer({
-        recipient: this.sendForm.recipient,
-        amount: this.sendForm.amount
+        recipient: this.sendForm.recipient.trim(),
+        amount: String(this.sendForm.amount)
       });
       this.sendForm = { recipient: '', amount: '' };
     } catch (error: any) {
@@ -240,7 +244,7 @@ export class TokenOperationsComponent {
     try {
       await this.tokenService.mint({
         to: this.mintForm.to,
-        amount: this.mintForm.amount
+        amount: String(this.mintForm.amount)
       });
       this.mintForm = { to: '', amount: '' };
     } catch (error: any) {
@@ -256,7 +260,7 @@ export class TokenOperationsComponent {
     try {
       await this.tokenService.burn({
         from: this.burnForm.from,
-        amount: this.burnForm.amount
+        amount: String(this.burnForm.amount)
       });
       this.burnForm = { from: '', amount: '' };
     } catch (error: any) {

@@ -12,6 +12,7 @@ export interface Toast {
 @Injectable({
   providedIn: 'root'
 })
+
 export class ToastService {
   private toastsSubject = new BehaviorSubject<Toast[]>([]);
   public toasts$: Observable<Toast[]> = this.toastsSubject.asObservable();
@@ -19,6 +20,7 @@ export class ToastService {
   private defaultDuration = 5000; // 5 seconds
 
   show(message: string, type: Toast['type'] = 'info', duration?: number): string {
+    console.log(`ToastService: Showing toast of type "${type}" with message: "${message}"`);
     const toast: Toast = {
       id: `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       message,

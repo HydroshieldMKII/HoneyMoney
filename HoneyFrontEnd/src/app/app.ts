@@ -4,6 +4,7 @@ import { WalletService } from './services/wallet.service';
 import { TokenService } from './services/token.service';
 import { BlockchainService } from './services/blockchain.service';
 import { Observable } from 'rxjs';
+import { HlmToasterComponent } from '@spartan-ng/helm/sonner';
 
 // Import components
 import { WalletDetails } from './components/wallet-details/wallet-details';
@@ -23,7 +24,8 @@ import { ToastComponent } from './components/toast/toast';
     TokenOperationsComponent,
     LeaderboardComponent,
     BlockchainViewerComponent,
-    ToastComponent
+    ToastComponent,
+    HlmToasterComponent
   ],
   templateUrl: './app.html'
 })

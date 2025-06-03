@@ -139,7 +139,7 @@ export class TokenService {
         this.updateTokenData(),
         this.updateLeaderboard()
       ]);
-      this.toastService.success('Data refreshed successfully');
+      // this.toastService.success('Data refreshed successfully');
     } catch (error: any) {
       console.error('Error refreshing data:', error);
       this.errorSubject.next(error.message || 'Failed to refresh data');
@@ -264,7 +264,7 @@ export class TokenService {
 
     try {
       const tx = await action();
-      this.toastService.info(`Transaction submitted: ${tx}`);
+      this.toastService.info(`Transaction submitted: ${tx.hash}`);
       
       await tx.wait();
       
@@ -330,6 +330,8 @@ export class TokenService {
 
     this.validateAddress(recipient);
     this.validateAmount(amount);
+
+    console.log(`Transferring ${amount} tokens to ${recipient}`);
 
     await this.executeTransaction(
       () => this.tokenContract!['transfer'](recipient, parseUnits(amount, 18)),

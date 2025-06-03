@@ -141,22 +141,39 @@ const renderBlockchain = (blocks) => {
     ).toISOString();
 
     // simple decode of the *first* tx, same as before
-    let fn = "N/A",
-      from = "N/A",
-      to = "N/A";
-    if (block.transactions?.length) {
-      const tx = block.transactions[0];
-      from = tx.from;
-      to = tx.to;
-      try {
-        fn = new ethers.utils.Interface(tokenABI).parseTransaction({
-          data: tx.input,
-          value: tx.value,
-        }).name;
-      } catch (_) {
-        fn = "Constructor";
-      }
+let fn = "N/A", from = "N/A", to = "N/A", decodedArgs = "";
+
+if (block.transactions?.length) {
+  const tx = block.transactions[0];
+  from = tx.from;
+  to = tx.to;
+
+  try {
+    const iface = new ethers.utils.Interface(tokenABI);
+    const parsed = iface.parseTransaction({
+      data: tx.input,
+      value: tx.value,
+    });
+    fn = parsed.name;
+
+    // Show each argument with its name or index
+decodedArgs = Object.entries(parsed.args)
+  .filter(([k]) => isNaN(k)) // skip numeric indexes
+  .map(([key, value]) => {
+    if (key.toLowerCase().includes("amount") || key.toLowerCase().includes("value")) {
+      // Format amount to human-readable (assumes 18 decimals)
+      value = (ethers.utils.formatUnits(value, 18)) + " tokens";
     }
+    return `<div><b>${key}:</b> ${value}</div>`;
+  })
+  .join("");
+  } catch (_) {
+    fn = "Constructor";
+    decodedArgs = "";
+  }
+}
+
+    console.log("rendering block", block);
 
     div.innerHTML = `
       <div><label>Block #:</label>
@@ -176,9 +193,10 @@ const renderBlockchain = (blocks) => {
                   value="${block.hash || "N/A"}"></div>
 
       <div class="mt-2"><strong>Decoded Transaction:</strong></div>
-      <div><label>Function:</label>
-           <input class="form-control form-control-sm mb-2"
-                  value="${fn}"></div>
+        <div><label>Function:</label>
+            <input class="form-control form-control-sm mb-2" value="${fn}"></div>
+        <div><label>Decoded Params:</label>
+     <div class="form-control form-control-sm mb-2 bg-white" style="white-space: normal;">${decodedArgs}</div></div>
       <div><label>From:</label>
            <input class="form-control form-control-sm mb-2"
                   value="${from}"></div>

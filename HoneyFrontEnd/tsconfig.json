@@ -36,6 +36,9 @@
       ],
       "@spartan-ng/helm/sonner": [
         "./libs/ui/ui-sonner-helm/src/index.ts"
+      ],
+      "@spartan-ng/helm/progress": [
+        "./libs/ui/ui-progress-helm/src/index.ts"
       ]
     }
   },

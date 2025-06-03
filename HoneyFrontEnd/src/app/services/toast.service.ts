@@ -6,11 +6,19 @@ import { toast } from 'ngx-sonner';
 })
 export class ToastService {
   
-  info(message: string, description?: string): void {
+  info(message: string, duration?: number | string): string | number {
+    if (duration === 0) {
+      // Return toast ID for persistent toasts
+      return toast.info(message, {
+        duration: Infinity,
+      });
+    }
+    
     toast.info(message, {
-      description,
-      duration: 4000,
+      duration: typeof duration === 'number' ? duration : 4000,
     });
+    
+    return '';
   }
 
   success(message: string, description?: string): void {
@@ -32,6 +40,11 @@ export class ToastService {
       description,
       duration: 5000,
     });
+  }
+
+  // Method to remove/dismiss a toast
+  remove(toastId: string | number): void {
+    toast.dismiss(toastId);
   }
 
   // Method for custom toast with action

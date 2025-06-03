@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, combineLatest, throwError } from 'rxjs';
 import { ethers, formatUnits, parseUnits, isAddress,  } from 'ethers';
 import { WalletService } from './wallet.service';
-import { ToastService } from '../components/toast/toast';
+import { ToastService } from '../services/toast.service';
 import { catchError, map } from 'rxjs/operators';
 
 export interface TokenData {

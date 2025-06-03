@@ -10,7 +10,11 @@ import {
   HlmCardTitleDirective,
 } from '@spartan-ng/helm/card';
 import { HlmButtonDirective } from '@spartan-ng/helm/button';
-import { BlockchainService, BlockData, DecodedTransaction } from '../../services/blockchain.service';
+import {
+  BlockchainService,
+  BlockData,
+  DecodedTransaction,
+} from '../../services/blockchain.service';
 import { WalletService } from '../../services/wallet.service';
 
 @Component({
@@ -23,19 +27,22 @@ import { WalletService } from '../../services/wallet.service';
     HlmCardTitleDirective,
     HlmCardDescriptionDirective,
     HlmCardContentDirective,
-    HlmButtonDirective
+    HlmButtonDirective,
   ],
   template: `
-    <section hlmCard class="w-4/5 mx-auto mb-4" *ngIf="connected$ | async">
+    <section hlmCard class="w-4/5 mx-auto mb-5" *ngIf="connected$ | async">
       <div hlmCardHeader>
         <div class="flex justify-between items-center">
           <div>
             <h3 hlmCardTitle>⛓️ Live Blockchain Explorer</h3>
-            <p hlmCardDescription>Real-time view of blockchain blocks and transactions</p>
+            <p hlmCardDescription>
+              Real-time view of blockchain blocks and transactions
+            </p>
           </div>
-          <button 
-            hlmBtn 
-            (click)="loadBlocks()" 
+          <button
+            *ngIf="(blocks$ | async)?.length"
+            hlmBtn
+            (click)="loadBlocks()"
             [disabled]="loading$ | async"
             variant="secondary"
           >
@@ -47,22 +54,36 @@ import { WalletService } from '../../services/wallet.service';
         <!-- Blockchain Stats -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div class="text-center p-4 bg-blue-50 dark:bg-blue-900 rounded-lg">
-            <div class="font-bold text-xl text-blue-600">{{ getBlocksCount() }}</div>
-            <div class="text-sm text-gray-600 dark:text-gray-400">Total Blocks</div>
+            <div class="font-bold text-xl text-blue-600">
+              {{ getBlocksCount() }}
+            </div>
+            <div class="text-sm text-gray-600 dark:text-gray-400">
+              Total Blocks
+            </div>
           </div>
           <div class="text-center p-4 bg-green-50 dark:bg-green-900 rounded-lg">
-            <div class="font-bold text-xl text-green-600">{{ getLatestBlockNumber() }}</div>
-            <div class="text-sm text-gray-600 dark:text-gray-400">Latest Block</div>
+            <div class="font-bold text-xl text-green-600">
+              {{ getLatestBlockNumber() }}
+            </div>
+            <div class="text-sm text-gray-600 dark:text-gray-400">
+              Latest Block
+            </div>
           </div>
-          <div class="text-center p-4 bg-purple-50 dark:bg-purple-900 rounded-lg">
-            <div class="font-bold text-xl text-purple-600">{{ isChainValid() ? '✅' : '❌' }}</div>
-            <div class="text-sm text-gray-600 dark:text-gray-400">Chain Integrity</div>
+          <div
+            class="text-center p-4 bg-purple-50 dark:bg-purple-900 rounded-lg"
+          >
+            <div class="font-bold text-xl text-purple-600">
+              {{ isChainValid() ? '✅' : '❌' }}
+            </div>
+            <div class="text-sm text-gray-600 dark:text-gray-400">
+              Chain Integrity
+            </div>
           </div>
         </div>
 
         <!-- Error Display -->
-        <div 
-          *ngIf="error$ | async as error" 
+        <div
+          *ngIf="error$ | async as error"
           class="mb-4 p-4 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg"
         >
           <p class="text-red-800 dark:text-red-200">{{ error }}</p>
@@ -71,7 +92,9 @@ import { WalletService } from '../../services/wallet.service';
         <!-- Loading State -->
         <div *ngIf="loading$ | async" class="text-center py-8">
           <div class="inline-flex items-center space-x-2">
-            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+            <div
+              class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"
+            ></div>
             <span>Loading blockchain data...</span>
           </div>
         </div>
@@ -80,25 +103,25 @@ import { WalletService } from '../../services/wallet.service';
         <div class="relative" *ngIf="(blocks$ | async)?.length">
           <!-- Navigation Controls -->
           <div class="flex justify-between items-center mb-4">
-            <button 
-              hlmBtn 
+            <button
+              hlmBtn
               variant="outline"
-              (click)="prevSlide()" 
+              (click)="prevSlide()"
               [disabled]="currentSlide === 0"
               class="flex items-center space-x-2"
             >
               <span>←</span>
               <span>Previous</span>
             </button>
-            
+
             <div class="text-sm text-gray-600 dark:text-gray-400">
               Block {{ currentSlide + 1 }} of {{ (blocks$ | async)?.length }}
             </div>
-            
-            <button 
-              hlmBtn 
+
+            <button
+              hlmBtn
               variant="outline"
-              (click)="nextSlide()" 
+              (click)="nextSlide()"
               [disabled]="currentSlide >= ((blocks$ | async)?.length || 0) - 1"
               class="flex items-center space-x-2"
             >
@@ -108,7 +131,7 @@ import { WalletService } from '../../services/wallet.service';
           </div>
 
           <!-- Block Display -->
-          <div 
+          <div
             *ngFor="let block of blocks$ | async; let i = index"
             [class.hidden]="i !== currentSlide"
             class="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
@@ -116,7 +139,9 @@ import { WalletService } from '../../services/wallet.service';
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <!-- Block Information -->
               <div>
-                <h4 class="font-bold text-lg mb-3 text-blue-600">🧱 Block Information</h4>
+                <h4 class="font-bold text-lg mb-3 text-blue-600">
+                  🧱 Block Information
+                </h4>
                 <div class="space-y-2 text-sm">
                   <div class="flex justify-between">
                     <span class="font-medium">Block Number:</span>
@@ -124,15 +149,21 @@ import { WalletService } from '../../services/wallet.service';
                   </div>
                   <div class="flex justify-between">
                     <span class="font-medium">Timestamp:</span>
-                    <span class="font-mono text-xs">{{ formatTimestamp(block.timestamp) }}</span>
+                    <span class="font-mono text-xs">{{
+                      formatTimestamp(block.timestamp)
+                    }}</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="font-medium">Hash:</span>
-                    <span class="font-mono text-xs break-all">{{ truncateHash(block.hash) }}</span>
+                    <span class="font-mono text-xs break-all">{{
+                      block.hash
+                    }}</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="font-medium">Parent Hash:</span>
-                    <span class="font-mono text-xs break-all">{{ truncateHash(block.parentHash) }}</span>
+                    <span class="font-mono text-xs break-all">{{
+                      block.parentHash
+                    }}</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="font-medium">Miner:</span>
@@ -140,54 +171,69 @@ import { WalletService } from '../../services/wallet.service';
                   </div>
                   <div class="flex justify-between">
                     <span class="font-medium">Gas Used:</span>
-                    <span class="font-mono">{{ block.gasUsed }} / {{ block.gasLimit }}</span>
+                    <span class="font-mono"
+                      >{{ block.gasUsed }} / {{ block.gasLimit }}</span
+                    >
                   </div>
                   <div class="flex justify-between">
                     <span class="font-medium">Transactions:</span>
-                    <span class="font-mono">{{ block.transactions.length || 0 }}</span>
+                    <span class="font-mono">{{
+                      block.transactions.length || 0
+                    }}</span>
                   </div>
                 </div>
               </div>
 
               <!-- Transaction Information -->
               <div>
-                <h4 class="font-bold text-lg mb-3 text-green-600">📋 Transaction Details</h4>
-                <div *ngIf="block.transactions && block.transactions.length > 0; else noTransactions">
-                  <ng-container *ngFor="let decoded of getDecodedTransactions(block)">
+                <h4 class="font-bold text-lg mb-3 text-green-600">
+                  📋 Transaction Details
+                </h4>
+                <div
+                  *ngIf="
+                    block.transactions && block.transactions.length > 0;
+                    else noTransactions
+                  "
+                >
+                  <ng-container
+                    *ngFor="let decoded of getDecodedTransactions(block)"
+                  >
                     <div class="space-y-2 text-sm bg-white p-3 rounded border">
                       <div class="flex justify-between">
                         <span class="font-medium">Function:</span>
-                        <span class="font-mono text-blue-600">{{ decoded.functionName }}</span>
+                        <span class="font-mono text-blue-600">{{
+                          decoded.functionName
+                        }}</span>
                       </div>
+
+                      <div>
+                        <div class="flex justify-between mb-2">
+                          <span class="font-medium">Decoded Params:</span>
+                        </div>
+                        <div
+                          class="bg-gray-50 p-2 rounded text-xs"
+                          style="white-space: normal;"
+                          [innerHTML]="
+                            getFormattedDecodedArgs(decoded.decodedArgs)
+                          "
+                        ></div>
+                      </div>
+
                       <div class="flex justify-between">
                         <span class="font-medium">From:</span>
-                        <span class="font-mono text-xs">{{ truncateHash(decoded.from) }}</span>
+                        <span class="font-mono text-xs">{{
+                          decoded.from
+                        }}</span>
                       </div>
                       <div class="flex justify-between">
-                        <span class="font-medium">To:</span>
-                        <span class="font-mono text-xs">{{ truncateHash(decoded.to) }}</span>
-                      </div>
-                      <div class="flex justify-between">
-                        <span class="font-medium">Value:</span>
-                        <span class="font-mono">{{ decoded.value }}</span>
+                        <span class="font-medium">To (Contract):</span>
+                        <span class="font-mono text-xs">{{ decoded.to }}</span>
                       </div>
                       <div class="flex justify-between">
                         <span class="font-medium">Gas:</span>
-                        <span class="font-mono text-xs">{{ decoded.gasLimit }} ({{ decoded.gasPrice }})</span>
-                      </div>
-                      
-                      <!-- Decoded Arguments -->
-                      <div *ngIf="Object.keys(decoded.decodedArgs).length > 0" class="mt-3">
-                        <span class="font-medium text-purple-600">Arguments:</span>
-                        <div class="mt-1 space-y-1">
-                          <div 
-                            *ngFor="let arg of Object.keys(decoded.decodedArgs)"
-                            class="flex justify-between text-xs"
-                          >
-                            <span class="text-gray-600">{{ arg }}:</span>
-                            <span class="font-mono">{{ decoded.decodedArgs[arg] }}</span>
-                          </div>
-                        </div>
+                        <span class="font-mono text-xs"
+                          >{{ decoded.gasLimit }} ({{ decoded.gasPrice }})</span
+                        >
                       </div>
                     </div>
                   </ng-container>
@@ -203,25 +249,34 @@ import { WalletService } from '../../services/wallet.service';
 
             <!-- Additional Block Details (Collapsible) -->
             <div class="mt-4 pt-4 border-t">
-              <button 
+              <button
                 class="text-sm text-blue-600 hover:text-blue-800"
                 (click)="toggleBlockDetails(i)"
               >
                 {{ showDetails[i] ? 'Hide' : 'Show' }} Additional Details
               </button>
-              
-              <div *ngIf="showDetails[i]" class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+
+              <div
+                *ngIf="showDetails[i]"
+                class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs"
+              >
                 <div>
                   <span class="font-medium">State Root:</span>
-                  <span class="font-mono block break-all">{{ block.stateRoot }}</span>
+                  <span class="font-mono block break-all">{{
+                    block.stateRoot
+                  }}</span>
                 </div>
                 <div>
                   <span class="font-medium">Transactions Root:</span>
-                  <span class="font-mono block break-all">{{ block.transactionsRoot }}</span>
+                  <span class="font-mono block break-all">{{
+                    block.transactionsRoot
+                  }}</span>
                 </div>
                 <div>
                   <span class="font-medium">Receipts Root:</span>
-                  <span class="font-mono block break-all">{{ block.receiptsRoot }}</span>
+                  <span class="font-mono block break-all">{{
+                    block.receiptsRoot
+                  }}</span>
                 </div>
                 <div>
                   <span class="font-medium">Difficulty:</span>
@@ -253,14 +308,21 @@ import { WalletService } from '../../services/wallet.service';
         </div>
 
         <!-- Empty State -->
-        <div *ngIf="!(blocks$ | async)?.length && !(loading$ | async)" class="text-center py-8">
+        <div
+          *ngIf="!(blocks$ | async)?.length && !(loading$ | async)"
+          class="text-center py-8"
+        >
           <span class="text-4xl">⛓️</span>
-          <p class="mt-2 text-gray-600 dark:text-gray-400">No blocks loaded yet</p>
-          <button hlmBtn class="mt-4" (click)="loadBlocks()">Load Blockchain Data</button>
+          <p class="mt-2 text-gray-600 dark:text-gray-400">
+            No blocks loaded yet
+          </p>
+          <button hlmBtn class="mt-4" (click)="loadBlocks()">
+            Load Blockchain Data
+          </button>
         </div>
       </div>
     </section>
-  `
+  `,
 })
 export class BlockchainViewerComponent implements OnInit {
   blocks$: Observable<BlockData[]>;
@@ -293,11 +355,13 @@ export class BlockchainViewerComponent implements OnInit {
   }
 
   nextSlide(): void {
-    this.blockchainService.blocks$.subscribe(blocks => {
-      if (this.currentSlide < blocks.length - 1) {
-        this.currentSlide++;
-      }
-    }).unsubscribe();
+    this.blockchainService.blocks$
+      .subscribe((blocks) => {
+        if (this.currentSlide < blocks.length - 1) {
+          this.currentSlide++;
+        }
+      })
+      .unsubscribe();
   }
 
   prevSlide(): void {
@@ -337,8 +401,22 @@ export class BlockchainViewerComponent implements OnInit {
     return new Date(timestamp).toLocaleString();
   }
 
-  truncateHash(hash: string): string {
-    if (!hash || hash === 'N/A') return hash;
-    return `${hash.substring(0, 6)}...${hash.substring(hash.length - 4)}`;
+  getFormattedDecodedArgs(decodedArgs: { [key: string]: any }): string {
+    console.log('Formatting decoded args:', decodedArgs);
+
+    if (!decodedArgs || Object.keys(decodedArgs).length === 0) {
+      return '<div class="text-gray-500 italic">No parameters</div>';
+    }
+
+    // Format exactly like the JavaScript version
+    const formatted = Object.entries(decodedArgs)
+      .map(([key, value]) => {
+        console.log(`Formatting: ${key} = ${value}`);
+        return `<div><b>${key}:</b> ${value}</div>`;
+      })
+      .join('');
+
+    console.log('Final formatted HTML:', formatted);
+    return formatted || '<div class="text-gray-500 italic">No parameters</div>';
   }
 }

@@ -62,14 +62,13 @@ import { WalletService } from '../../services/wallet.service';
                       [class.text-red-600]="entry.isBlacklisted"
                       [class.font-bold]="isCurrentUser(entry.address)"
                     >
-                      {{ entry.address }}
-                    </code>
-                    <span 
+                      {{ entry.address }}<span 
                       *ngIf="isCurrentUser(entry.address)"
                       class="text-xs text-blue-600 dark:text-blue-400 font-semibold"
                     >
                       (You)
                     </span>
+                    </code>
                   </div>
                 </td>
                 <td class="px-4 py-3">

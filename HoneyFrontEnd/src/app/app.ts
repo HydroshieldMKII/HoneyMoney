@@ -12,7 +12,6 @@ import { ContractDetails } from './components/contract-details/contract-details'
 import { TokenOperationsComponent } from './components/token-operations/token-operations';
 import { LeaderboardComponent } from './components/leaderboard/leaderboard';
 import { BlockchainViewerComponent } from './components/blockchain-viewer/blockchain-viewer';
-import { ToastComponent } from './components/toast/toast';
 
 @Component({
   selector: 'app-root',
@@ -24,7 +23,6 @@ import { ToastComponent } from './components/toast/toast';
     TokenOperationsComponent,
     LeaderboardComponent,
     BlockchainViewerComponent,
-    ToastComponent,
     HlmToasterComponent
   ],
   templateUrl: './app.html'

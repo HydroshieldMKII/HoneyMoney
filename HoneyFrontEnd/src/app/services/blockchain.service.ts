@@ -1,6 +1,13 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { ethers, formatEther, formatUnits, parseUnits, Interface, toBeHex } from 'ethers';
+import {
+  ethers,
+  formatEther,
+  formatUnits,
+  parseUnits,
+  Interface,
+  toBeHex,
+} from 'ethers';
 import { WalletService } from './wallet.service';
 import { ToastService } from './toast.service';
 
@@ -35,25 +42,25 @@ export interface DecodedTransaction {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class BlockchainService {
   private readonly tokenABI = [
-    "function name() view returns (string)",
-    "function symbol() view returns (string)",
-    "function balanceOf(address) view returns (uint)",
-    "function transfer(address to, uint amount) returns (bool)",
-    "function mint(address to, uint amount)",
-    "function burn(address from, uint amount)",
-    "function isBlacklisted(address) view returns (bool)",
-    "function blacklist(address, bool) returns (bool)",
-    "function getBlacklistedAddresses() view returns (address[])",
-    "function clearBlacklist()",
-    "function togglePause()",
-    "function isPaused() view returns (bool)",
-    "function getOwner() view returns (address)",
-    "function getContractAddress() view returns (address)",
-    "function totalSupply() view returns (uint)",
+    'function name() view returns (string)',
+    'function symbol() view returns (string)',
+    'function balanceOf(address account) view returns (uint)',
+    'function transfer(address to, uint amount) returns (bool)',
+    'function mint(address to, uint amount)',
+    'function burn(address from, uint amount)',
+    'function isBlacklisted(address account) view returns (bool)',
+    'function blacklist(address account, bool isBlacklisted) returns (bool)',
+    'function getBlacklistedAddresses() view returns (address[])',
+    'function clearBlacklist()',
+    'function togglePause()',
+    'function isPaused() view returns (bool)',
+    'function getOwner() view returns (address)',
+    'function getContractAddress() view returns (address)',
+    'function totalSupply() view returns (uint)',
   ];
 
   private blocksSubject = new BehaviorSubject<BlockData[]>([]);
@@ -69,42 +76,78 @@ export class BlockchainService {
     private toastService: ToastService
   ) {}
 
-  async loadBlocks(): Promise<void> {
-    const provider = this.walletService.getCurrentProvider();
-    if (!provider) {
-      this.toastService.error('No provider available. Please connect your wallet.');
-      return;
-    }
-
-    this.loadingSubject.next(true);
-    this.errorSubject.next(null);
-
-    try {
-      const latest = await provider.getBlockNumber();
-      const blocks: BlockData[] = [];
-
-      this.toastService.info(`Loading ${latest + 1} blocks...`);
-
-      for (let i = 0; i <= latest; i++) {
-        const block = await provider.send("eth_getBlockByNumber", [
-          toBeHex(i),
-          true,
-        ]);
-        blocks.push(this.formatBlockData(block));
-      }
-
-      console.log('Loaded blocks:', blocks.length, 'latest block number:', latest);
-      this.blocksSubject.next(blocks);
-      this.toastService.success(`Successfully loaded ${blocks.length} blocks`);
-    } catch (error: any) {
-      console.error('Error loading blocks:', error);
-      const errorMessage = `Failed to load blocks: ${error.message}`;
-      this.errorSubject.next(errorMessage);
-      this.toastService.error(errorMessage);
-    } finally {
-      this.loadingSubject.next(false);
-    }
+async loadBlocks(): Promise<void> {
+  const provider = this.walletService.getCurrentProvider();
+  if (!provider) {
+    this.toastService.error('Wallet Connection Required', 'Please connect your wallet to load blockchain data.');
+    return;
   }
+
+  this.loadingSubject.next(true);
+  this.errorSubject.next(null);
+
+  // Show loading toast
+  const loadingToastId = this.toastService.loading('Loading blockchain data...', 'Fetching blocks from the network');
+
+  try {
+    const latest = await provider.getBlockNumber();
+    const blocks: BlockData[] = [];
+
+    // Update loading message with progress
+    this.toastService.dismiss(loadingToastId);
+    const progressToastId = this.toastService.loading(`Loading ${latest + 1} blocks...`, 'This may take a few seconds');
+
+    for (let i = 0; i <= latest; i++) {
+      const block = await provider.send("eth_getBlockByNumber", [
+        toBeHex(i),
+        true,
+      ]);
+      
+      console.log(`Raw block ${i}:`, block);
+      
+      if (block.transactions && block.transactions.length > 0) {
+        console.log(`Block ${i} transactions:`, block.transactions);
+        block.transactions.forEach((tx: any, idx: number) => {
+          console.log(`  Transaction ${idx}:`, {
+            from: tx.from,
+            to: tx.to,
+            input: tx.input,
+            value: tx.value,
+            hash: tx.hash
+          });
+        });
+      }
+      
+      blocks.push(this.formatBlockData(block));
+    }
+
+    console.log('Loaded blocks:', blocks.length, 'latest block number:', latest);
+    this.blocksSubject.next(blocks);
+    
+    // Update to success toast
+    this.toastService.updateToast(
+      progressToastId, 
+      'Blockchain data loaded successfully', 
+      'success',
+      `Loaded ${blocks.length} blocks`
+    );
+
+  } catch (error: any) {
+    console.error('Error loading blocks:', error);
+    const errorMessage = `Failed to load blocks: ${error.message}`;
+    this.errorSubject.next(errorMessage);
+    
+    // Update to error toast
+    this.toastService.updateToast(
+      loadingToastId, 
+      'Failed to load blockchain data', 
+      'error',
+      errorMessage
+    );
+  } finally {
+    this.loadingSubject.next(false);
+  }
+}
 
   private formatBlockData(block: any): BlockData {
     return {
@@ -124,48 +167,79 @@ export class BlockchainService {
       receiptsRoot: block.receiptsRoot || '0x0',
       logsBloom: block.logsBloom || '0x0',
       sha3Uncles: block.sha3Uncles || '0x0',
-      mixHash: block.mixHash || '0x0'
+      mixHash: block.mixHash || '0x0',
     };
   }
 
   decodeTransaction(block: BlockData): DecodedTransaction {
-    let functionName = "N/A";
-    let from = "N/A";
-    let to = "N/A";
+    let functionName = 'N/A';
+    let from = 'N/A';
+    let to = 'N/A';
     let decodedArgs: { [key: string]: any } = {};
-    let value = "0";
-    let gasLimit = "0";
-    let gasPrice = "0";
+    let value = '0';
+    let gasLimit = '0';
+    let gasPrice = '0';
 
     if (block.transactions?.length) {
       const tx = block.transactions[0];
-      from = tx.from || "N/A";
-      to = tx.to || "N/A";
-      value = tx.value ? formatEther(tx.value) : "0";
-      gasLimit = tx.gas ? parseInt(tx.gas, 16).toString() : "0";
-      gasPrice = tx.gasPrice ? formatUnits(tx.gasPrice, 'gwei') : "0";
+      from = tx.from || 'N/A';
+      to = tx.to || 'N/A';
+      value = tx.value ? formatEther(tx.value) : '0';
+      gasLimit = tx.gas ? parseInt(tx.gas, 16).toString() : '0';
+      gasPrice = tx.gasPrice ? formatUnits(tx.gasPrice, 'gwei') : '0';
+
+      console.log('Raw transaction:', tx);
+      console.log('Transaction input:', tx.input);
 
       try {
-        if (tx.input && tx.input !== '0x') {
+        if (tx.input && tx.input !== '0x' && tx.input.length > 2) {
           const iface = new Interface(this.tokenABI);
+
+          console.log('Attempting to parse transaction with input:', tx.input);
+
           const parsed = iface.parseTransaction({
             data: tx.input,
-            value: tx.value,
+            value: tx.value || '0x0',
           });
-          
+
           if (parsed) {
             functionName = parsed.name;
-            
-            // Extract non-numeric arguments and format them
-            decodedArgs = Object.entries(parsed.args)
-              .filter(([key]) => isNaN(Number(key)))
-              .reduce((acc, [key, value]) => {
+            console.log('Successfully parsed transaction:', parsed);
+            console.log('Parsed args:', parsed.args);
+            console.log('Function fragment:', parsed.fragment);
+
+            // Get parameter names from the function fragment
+            const paramNames = parsed.fragment.inputs.map(
+              (input) => input.name
+            );
+            console.log('Parameter names from ABI:', paramNames);
+
+            // Map numeric indices to parameter names or create descriptive names
+            const entries = Object.entries(parsed.args);
+            console.log('All entries:', entries);
+
+            decodedArgs = entries
+              .filter(([key]) => !isNaN(Number(key))) // Only process numeric keys
+              .reduce((acc, [key, value], index) => {
+                console.log(`Processing arg: ${key} = ${value}`);
+
+                // Use parameter name from ABI if available, otherwise create descriptive name
+                let paramName =
+                  paramNames[parseInt(key)] ||
+                  this.getParameterName(functionName, index);
+                console.log(`Parameter name: ${paramName}`);
+
                 let formattedValue: string;
-                
-                if (key.toLowerCase().includes("amount") || key.toLowerCase().includes("value")) {
+
+                if (
+                  paramName.toLowerCase().includes('amount') ||
+                  paramName.toLowerCase().includes('value')
+                ) {
                   try {
-                    formattedValue = parseFloat(formatUnits(value as bigint, 18)).toFixed(4) + " tokens";
-                  } catch {
+                    formattedValue =
+                      formatUnits(value as bigint, 18) + ' tokens';
+                  } catch (error) {
+                    console.log('Error formatting amount:', error);
                     formattedValue = (value as any).toString();
                   }
                 } else if (typeof value === 'boolean') {
@@ -173,64 +247,93 @@ export class BlockchainService {
                 } else {
                   formattedValue = (value as any).toString();
                 }
-                
-                acc[key] = formattedValue;
+
+                console.log(
+                  `Formatted value for ${paramName}: ${formattedValue}`
+                );
+                acc[paramName] = formattedValue;
                 return acc;
               }, {} as { [key: string]: any });
+
+            console.log('Final decoded args:', decodedArgs);
+          } else {
+            console.log('Failed to parse transaction - parsed is null');
           }
         } else {
-          functionName = "Contract Deployment";
+          console.log('Transaction has no input data or empty input');
+          functionName = 'Contract Deployment or ETH Transfer';
         }
       } catch (error) {
-        console.log('Could not decode transaction:', error);
-        functionName = tx.input === '0x' ? "ETH Transfer" : "Unknown Function";
+        console.error('Error decoding transaction:', error);
+        functionName = 'Unknown Function';
         decodedArgs = {};
       }
     }
 
-    return { 
-      functionName, 
-      from, 
-      to, 
-      decodedArgs, 
-      value: value + " ETH",
+    return {
+      functionName,
+      from,
+      to,
+      decodedArgs,
+      value: value + ' ETH',
       gasLimit,
-      gasPrice: gasPrice + " Gwei"
+      gasPrice: gasPrice + ' Gwei',
     };
+  }
+
+  private getParameterName(functionName: string, index: number): string {
+    const parameterMaps: { [key: string]: string[] } = {
+      transfer: ['to', 'amount'],
+      mint: ['to', 'amount'],
+      burn: ['from', 'amount'],
+      blacklist: ['address', 'isBlacklisted'],
+      balanceOf: ['account'],
+      isBlacklisted: ['account'],
+    };
+
+    const params = parameterMaps[functionName];
+    if (params && params[index]) {
+      return params[index];
+    }
+
+    // Fallback to generic names
+    return `param${index}`;
   }
 
   // Utility method to validate blockchain integrity
   validateBlockchain(): { isValid: boolean; invalidBlocks: number[] } {
     const blocks = this.blocksSubject.value;
     const invalidBlocks: number[] = [];
-    
+
     for (let i = 1; i < blocks.length; i++) {
       const currentBlock = blocks[i];
       const previousBlock = blocks[i - 1];
-      
+
       if (currentBlock.parentHash !== previousBlock.hash) {
         invalidBlocks.push(parseInt(currentBlock.number));
       }
     }
-    
+
     return {
       isValid: invalidBlocks.length === 0,
-      invalidBlocks
+      invalidBlocks,
     };
   }
 
   // Get specific block by number
   getBlockByNumber(blockNumber: number): BlockData | null {
     const blocks = this.blocksSubject.value;
-    return blocks.find(block => parseInt(block.number) === blockNumber) || null;
+    return (
+      blocks.find((block) => parseInt(block.number) === blockNumber) || null
+    );
   }
 
   // Get latest block
   getLatestBlock(): BlockData | null {
     const blocks = this.blocksSubject.value;
     if (blocks.length === 0) return null;
-    
-    return blocks.reduce((latest, current) => 
+
+    return blocks.reduce((latest, current) =>
       parseInt(current.number) > parseInt(latest.number) ? current : latest
     );
   }

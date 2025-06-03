@@ -1,69 +1,78 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-
-export interface Toast {
-  id: string;
-  message: string;
-  type: 'info' | 'success' | 'error' | 'warning';
-  timestamp: number;
-  duration?: number;
-}
+import { toast } from 'ngx-sonner';
 
 @Injectable({
   providedIn: 'root'
 })
-
 export class ToastService {
-  private toastsSubject = new BehaviorSubject<Toast[]>([]);
-  public toasts$: Observable<Toast[]> = this.toastsSubject.asObservable();
-
-  private defaultDuration = 5000; // 5 seconds
-
-  show(message: string, type: Toast['type'] = 'info', duration?: number): string {
-    console.log(`ToastService: Showing toast of type "${type}" with message: "${message}"`);
-    const toast: Toast = {
-      id: `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      message,
-      type,
-      timestamp: Date.now(),
-      duration: duration || this.defaultDuration
-    };
-
-    const currentToasts = this.toastsSubject.value;
-    this.toastsSubject.next([...currentToasts, toast]);
-
-    // Auto-remove after specified duration
-    setTimeout(() => {
-      this.remove(toast.id);
-    }, toast.duration);
-
-    return toast.id;
+  
+  info(message: string, description?: string): void {
+    toast.info(message, {
+      description,
+      duration: 4000,
+    });
   }
 
-  remove(id: string): void {
-    const currentToasts = this.toastsSubject.value;
-    const filteredToasts = currentToasts.filter(toast => toast.id !== id);
-    this.toastsSubject.next(filteredToasts);
+  success(message: string, description?: string): void {
+    toast.success(message, {
+      description,
+      duration: 4000,
+    });
   }
 
-  clear(): void {
-    this.toastsSubject.next([]);
+  error(message: string, description?: string): void {
+    toast.error(message, {
+      description,
+      duration: 6000, // Longer duration for errors
+    });
   }
 
-  // Convenience methods
-  success(message: string, duration?: number): string {
-    return this.show(message, 'success', duration);
+  warning(message: string, description?: string): void {
+    toast.warning(message, {
+      description,
+      duration: 5000,
+    });
   }
 
-  error(message: string, duration?: number): string {
-    return this.show(message, 'error', duration);
+  // Method for custom toast with action
+  showWithAction(message: string, options: {
+    description?: string;
+    actionLabel?: string;
+    actionCallback?: () => void;
+    type?: 'success' | 'error' | 'warning' | 'info';
+  }): void {
+    const toastFn = options.type ? toast[options.type] : toast;
+    
+    toastFn(message, {
+      description: options.description,
+      action: options.actionLabel && options.actionCallback ? {
+        label: options.actionLabel,
+        onClick: options.actionCallback,
+      } : undefined,
+      duration: 4000,
+    });
   }
 
-  warning(message: string, duration?: number): string {
-    return this.show(message, 'warning', duration);
+  // Method for loading toast (useful for blockchain operations)
+  loading(message: string, description?: string): string | number {
+    return toast.loading(message, {
+      description,
+    });
   }
 
-  info(message: string, duration?: number): string {
-    return this.show(message, 'info', duration);
+  // Method to dismiss a loading toast
+  dismiss(toastId: string | number): void {
+    toast.dismiss(toastId);
+  }
+
+  // Method to update a loading toast to success/error
+  updateToast(toastId: string | number, message: string, type: 'success' | 'error', description?: string): void {
+    toast.dismiss(toastId);
+    
+    if (type === 'success') {
+      this.success(message, description);
+    } else {
+      this.error(message, description);
+    }
   }
 }

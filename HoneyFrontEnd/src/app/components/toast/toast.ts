@@ -1,54 +1,91 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ToastService, Toast } from '../../services/toast.service';
-import { Observable } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { toast } from 'ngx-sonner';
 
-@Component({
-  selector: 'app-toast',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
-    <div class="fixed top-4 right-4 z-50 space-y-2">
-      <div 
-        *ngFor="let toast of toasts$ | async"
-        class="flex items-center justify-between min-w-80 max-w-md p-4 rounded-lg shadow-lg"
-        [ngClass]="getToastClass(toast.type)"
-        role="alert"
-      >
-        <div class="flex-1 text-sm font-medium break-words">
-          {{ toast.message }}
-        </div>
-        <button 
-          type="button" 
-          class="ml-3 flex-shrink-0 w-6 h-6 rounded-full hover:bg-black/10 flex items-center justify-center text-lg font-bold leading-none" 
-          (click)="removeToast(toast.id)"
-          aria-label="Close"
-        >
-          ×
-        </button>
-      </div>
-    </div>
-  `
+@Injectable({
+  providedIn: 'root'
 })
-export class ToastComponent {
-  toasts$: Observable<Toast[]>;
-
-  constructor(private toastService: ToastService) {
-    this.toasts$ = this.toastService.toasts$;
+export class ToastService {
+  
+  info(message: string, duration?: number | string): string | number {
+    if (duration === 0) {
+      // Return toast ID for persistent toasts
+      return toast.info(message, {
+        duration: Infinity,
+      });
+    }
+    
+    toast.info(message, {
+      duration: typeof duration === 'number' ? duration : 4000,
+    });
+    
+    return '';
   }
 
-  getToastClass(type: Toast['type']): string {
-    const classes = {
-      info: 'bg-blue-500 text-white',
-      success: 'bg-green-500 text-white',
-      error: 'bg-red-500 text-white',
-      warning: 'bg-yellow-500 text-black',
-      default: 'bg-gray-500 text-white'
-    };
-    return classes[type] || 'text-bg-secondary';
+  success(message: string, description?: string): void {
+    toast.success(message, {
+      description,
+      duration: 4000,
+    });
   }
 
-  removeToast(id: string): void {
-    this.toastService.remove(id);
+  error(message: string, description?: string): void {
+    toast.error(message, {
+      description,
+      duration: 6000, // Longer duration for errors
+    });
+  }
+
+  warning(message: string, description?: string): void {
+    toast.warning(message, {
+      description,
+      duration: 5000,
+    });
+  }
+
+  // Method to remove/dismiss a toast
+  remove(toastId: string | number): void {
+    toast.dismiss(toastId);
+  }
+
+  // Method for custom toast with action
+  showWithAction(message: string, options: {
+    description?: string;
+    actionLabel?: string;
+    actionCallback?: () => void;
+    type?: 'success' | 'error' | 'warning' | 'info';
+  }): void {
+    const toastFn = options.type ? toast[options.type] : toast;
+    
+    toastFn(message, {
+      description: options.description,
+      action: options.actionLabel && options.actionCallback ? {
+        label: options.actionLabel,
+        onClick: options.actionCallback,
+      } : undefined,
+      duration: 4000,
+    });
+  }
+
+  // Method for loading toast (useful for blockchain operations)
+  loading(message: string, description?: string): string | number {
+    return toast.loading(message, {
+      description,
+    });
+  }
+
+  // Method to dismiss a loading toast
+  dismiss(toastId: string | number): void {
+    toast.dismiss(toastId);
+  }
+
+  // Method to update a loading toast to success/error
+  updateToast(toastId: string | number, message: string, type: 'success' | 'error', description?: string): void {
+    toast.dismiss(toastId);
+    
+    if (type === 'success') {
+      this.success(message, description);
+    } else {
+      this.error(message, description);
+    }
   }
 }

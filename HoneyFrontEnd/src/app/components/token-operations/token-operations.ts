@@ -1,125 +1,300 @@
+// src/app/components/token-operations/token-operations.ts
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { TokenService, TokenData } from '../../services/token.service';
-import { WalletService } from '../../services/wallet.service';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
+import {
+  HlmCardContentDirective,
+  HlmCardDescriptionDirective,
+  HlmCardDirective,
+  HlmCardHeaderDirective,
+  HlmCardTitleDirective,
+} from '@spartan-ng/helm/card';
+import { HlmButtonDirective } from '@spartan-ng/helm/button';
+import { TokenService } from '../../services/token.service';
+import { WalletService } from '../../services/wallet.service';
 
 @Component({
   selector: 'app-token-operations',
-  templateUrl: './token-operations.html'
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    HlmCardDirective,
+    HlmCardHeaderDirective,
+    HlmCardTitleDirective,
+    HlmCardDescriptionDirective,
+    HlmCardContentDirective,
+    HlmButtonDirective
+  ],
+  template: `
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 w-4/5 mx-auto" *ngIf="connected$ | async">
+      
+      <!-- Send Tokens -->
+      <section hlmCard>
+        <div hlmCardHeader>
+          <h4 hlmCardTitle class="text-lg">💸 Send HoneyMoney</h4>
+          <p hlmCardDescription>Transfer tokens to another address</p>
+        </div>
+        <div hlmCardContent>
+          <div class="space-y-3">
+            <input 
+              type="text"
+              [(ngModel)]="sendForm.recipient"
+              placeholder="Recipient address"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <input 
+              type="number"
+              [(ngModel)]="sendForm.amount"
+              placeholder="Amount"
+              min="0"
+              step="0.0001"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button 
+              hlmBtn 
+              class="w-full"
+              variant="default"
+              (click)="onSend()"
+              [disabled]="loading$ | async"
+            >
+              Send Tokens
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Mint Tokens -->
+      <section hlmCard>
+        <div hlmCardHeader>
+          <h4 hlmCardTitle class="text-lg">🏭 Mint Tokens</h4>
+          <p hlmCardDescription>Create new tokens (Owner only)</p>
+        </div>
+        <div hlmCardContent>
+          <div class="space-y-3">
+            <input 
+              type="text"
+              [(ngModel)]="mintForm.to"
+              placeholder="To address (blank = self)"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <input 
+              type="number"
+              [(ngModel)]="mintForm.amount"
+              placeholder="Amount"
+              min="0"
+              step="0.0001"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button 
+              hlmBtn 
+              class="w-full"
+              variant="secondary"
+              (click)="onMint()"
+              [disabled]="loading$ | async"
+            >
+              Mint Tokens
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Burn Tokens -->
+      <section hlmCard>
+        <div hlmCardHeader>
+          <h4 hlmCardTitle class="text-lg">🔥 Burn Tokens</h4>
+          <p hlmCardDescription>Destroy tokens permanently</p>
+        </div>
+        <div hlmCardContent>
+          <div class="space-y-3">
+            <input 
+              type="text"
+              [(ngModel)]="burnForm.from"
+              placeholder="From address (blank = self)"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <input 
+              type="number"
+              [(ngModel)]="burnForm.amount"
+              placeholder="Amount"
+              min="0"
+              step="0.0001"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button 
+              hlmBtn 
+              class="w-full"
+              variant="destructive"
+              (click)="onBurn()"
+              [disabled]="loading$ | async"
+            >
+              Burn Tokens
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Blacklist Management -->
+    <section hlmCard class="w-4/5 mx-auto mb-4" *ngIf="isUserOwner() && (connected$ | async)">
+      <div hlmCardHeader>
+        <h4 hlmCardTitle class="text-lg">🚫 Blacklist Management</h4>
+        <p hlmCardDescription>Manage blacklisted addresses (Owner only)</p>
+      </div>
+      <div hlmCardContent>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div class="md:col-span-1">
+            <input 
+              type="text"
+              [(ngModel)]="blacklistForm.address"
+              placeholder="Address to manage"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <button 
+            hlmBtn 
+            variant="destructive"
+            (click)="onBlacklist()"
+            [disabled]="loading$ | async"
+          >
+            Blacklist
+          </button>
+          <button 
+            hlmBtn 
+            variant="default"
+            (click)="onUnblacklist()"
+            [disabled]="loading$ | async"
+          >
+            Remove from Blacklist
+          </button>
+          <button 
+            hlmBtn 
+            variant="secondary"
+            (click)="onClearBlacklist()"
+            [disabled]="loading$ | async"
+          >
+            Clear All
+          </button>
+        </div>
+      </div>
+    </section>
+  `
 })
 export class TokenOperationsComponent {
-  transferForm: FormGroup;
-  mintForm: FormGroup;
-  burnForm: FormGroup;
-  blacklistForm: FormGroup;
-  
   connected$: Observable<boolean>;
-  tokenData$: Observable<TokenData>;
   loading$: Observable<boolean>;
 
+  sendForm = {
+    recipient: '',
+    amount: ''
+  };
+
+  mintForm = {
+    to: '',
+    amount: ''
+  };
+
+  burnForm = {
+    from: '',
+    amount: ''
+  };
+
+  blacklistForm = {
+    address: ''
+  };
+
   constructor(
-    private fb: FormBuilder,
     private tokenService: TokenService,
     private walletService: WalletService
   ) {
     this.connected$ = this.walletService.connected$;
-    this.tokenData$ = this.tokenService.tokenData$;
     this.loading$ = this.tokenService.loading$;
-
-    this.transferForm = this.fb.group({
-      recipient: ['', [Validators.required, Validators.pattern(/^0x[a-fA-F0-9]{40}$/)]],
-      amount: ['', [Validators.required, Validators.min(0.0001)]]
-    });
-
-    this.mintForm = this.fb.group({
-      to: [''],
-      amount: ['', [Validators.required, Validators.min(0.0001)]]
-    });
-
-    this.burnForm = this.fb.group({
-      from: [''],
-      amount: ['', [Validators.required, Validators.min(0.0001)]]
-    });
-
-    this.blacklistForm = this.fb.group({
-      address: ['', [Validators.required, Validators.pattern(/^0x[a-fA-F0-9]{40}$/)]]
-    });
   }
 
-  async onTransfer(): Promise<void> {
-    if (this.transferForm.valid) {
-      const { recipient, amount } = this.transferForm.value;
-      try {
-        await this.tokenService.transfer({ recipient, amount });
-        this.transferForm.reset();
-      } catch (error) {
-        console.error('Transfer failed:', error);
-      }
+  isUserOwner(): boolean {
+    return this.tokenService.isUserOwner();
+  }
+
+  async onSend(): Promise<void> {
+    if (!this.sendForm.recipient || !this.sendForm.amount) {
+      return;
+    }
+
+    try {
+      await this.tokenService.transfer({
+        recipient: this.sendForm.recipient,
+        amount: this.sendForm.amount
+      });
+      this.sendForm = { recipient: '', amount: '' };
+    } catch (error: any) {
+      console.error('Send failed:', error);
     }
   }
 
   async onMint(): Promise<void> {
-    if (this.mintForm.valid) {
-      const { to, amount } = this.mintForm.value;
-      try {
-        await this.tokenService.mint({ to, amount });
-        this.mintForm.reset();
-      } catch (error) {
-        console.error('Mint failed:', error);
-      }
+    if (!this.mintForm.amount) {
+      return;
+    }
+
+    try {
+      await this.tokenService.mint({
+        to: this.mintForm.to,
+        amount: this.mintForm.amount
+      });
+      this.mintForm = { to: '', amount: '' };
+    } catch (error: any) {
+      console.error('Mint failed:', error);
     }
   }
 
   async onBurn(): Promise<void> {
-    if (this.burnForm.valid) {
-      const { from, amount } = this.burnForm.value;
-      try {
-        await this.tokenService.burn({ from, amount });
-        this.burnForm.reset();
-      } catch (error) {
-        console.error('Burn failed:', error);
-      }
+    if (!this.burnForm.amount) {
+      return;
+    }
+
+    try {
+      await this.tokenService.burn({
+        from: this.burnForm.from,
+        amount: this.burnForm.amount
+      });
+      this.burnForm = { from: '', amount: '' };
+    } catch (error: any) {
+      console.error('Burn failed:', error);
     }
   }
 
   async onBlacklist(): Promise<void> {
-    if (this.blacklistForm.valid) {
-      const { address } = this.blacklistForm.value;
-      try {
-        await this.tokenService.blacklistAddress(address, true);
-        this.blacklistForm.reset();
-      } catch (error) {
-        console.error('Blacklist failed:', error);
-      }
+    if (!this.blacklistForm.address) {
+      return;
+    }
+
+    try {
+      await this.tokenService.blacklistAddress(this.blacklistForm.address, true);
+      this.blacklistForm = { address: '' };
+    } catch (error: any) {
+      console.error('Blacklist failed:', error);
     }
   }
 
   async onUnblacklist(): Promise<void> {
-    if (this.blacklistForm.valid) {
-      const { address } = this.blacklistForm.value;
-      try {
-        await this.tokenService.blacklistAddress(address, false);
-        this.blacklistForm.reset();
-      } catch (error) {
-        console.error('Unblacklist failed:', error);
-      }
+    if (!this.blacklistForm.address) {
+      return;
+    }
+
+    try {
+      await this.tokenService.blacklistAddress(this.blacklistForm.address, false);
+      this.blacklistForm = { address: '' };
+    } catch (error: any) {
+      console.error('Unblacklist failed:', error);
     }
   }
 
   async onClearBlacklist(): Promise<void> {
     try {
       await this.tokenService.clearBlacklist();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Clear blacklist failed:', error);
-    }
-  }
-
-  async onTogglePause(): Promise<void> {
-    try {
-      await this.tokenService.togglePause();
-    } catch (error) {
-      console.error('Toggle pause failed:', error);
     }
   }
 }

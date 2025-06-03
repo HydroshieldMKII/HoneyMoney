@@ -11,6 +11,7 @@ import { ContractDetails } from './components/contract-details/contract-details'
 import { TokenOperationsComponent } from './components/token-operations/token-operations';
 import { LeaderboardComponent } from './components/leaderboard/leaderboard';
 import { BlockchainViewerComponent } from './components/blockchain-viewer/blockchain-viewer';
+import { Toast } from './services/toast.service';
 
 @Component({
   selector: 'app-root',
@@ -25,6 +26,7 @@ import { BlockchainViewerComponent } from './components/blockchain-viewer/blockc
   ],
   templateUrl: './app.html'
 })
+
 export class AppComponent implements OnInit {
   connected$: Observable<boolean>;
   address$: Observable<string>;

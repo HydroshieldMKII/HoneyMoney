@@ -132,6 +132,7 @@ const loadRealBlocksWithFullHeader = async () => {
   renderBlockchain(blocks);
 };
 
+
 const renderBlockchain = (blocks) => {
   const container = document.getElementById("blockchain-container");
   container.innerHTML = "";
@@ -183,100 +184,81 @@ const renderBlockchain = (blocks) => {
 
   const blocksDivs = container.querySelectorAll(".block");
 
-  const recalculateAndValidate = async () => {
-    console.log("Recalculating and validating blocks...");
-    let previousHash = null;
-
-    for (let i = 0; i < blocksDivs.length; i++) {
-      const blockDiv = blocksDivs[i];
-      const parentHashInput = blockDiv.querySelector(".parent-hash");
-      const hashInput = blockDiv.querySelector(".hash");
-      const minerInput = blockDiv.querySelector(".miner");
-      const timestampInput = blockDiv.querySelector(".timestamp");
-      const blockNumberInput = blockDiv.querySelector(".block-number");
-
-      // Create an updated block object with only relevant fields
-      const updatedBlock = {
-        ...blocks[i],
-        parentHash: parentHashInput.value,
-        miner: minerInput.value,
-        number: parseInt(blockNumberInput.value),
-        timestamp: Math.floor(new Date(timestampInput.value).getTime() / 1000),
-      };
-
-      // Recompute block hash
-      const recalculatedHash = await computeEthereumBlockHash(updatedBlock);
-      const previousHashBeforeUpdate = hashInput.value;
-
-      hashInput.value = recalculatedHash;
-
-      // If hash has changed, propagate to next blocks
-      if (recalculatedHash !== previousHashBeforeUpdate) {
-        let j = i + 1;
-        let currentParentHash = recalculatedHash;
-
-        while (j < blocksDivs.length) {
-          const nextBlockDiv = blocksDivs[j];
-          const nextParentHashInput =
-            nextBlockDiv.querySelector(".parent-hash");
-          const nextHashInput = nextBlockDiv.querySelector(".hash");
-          const nextMinerInput = nextBlockDiv.querySelector(".miner");
-          const nextTimestampInput = nextBlockDiv.querySelector(".timestamp");
-          const nextBlockNumberInput =
-            nextBlockDiv.querySelector(".block-number");
-
-          const updatedNextBlock = {
-            ...blocks[j],
-            parentHash: currentParentHash,
-            miner: nextMinerInput.value,
-            number: parseInt(nextBlockNumberInput.value),
-            timestamp: Math.floor(
-              new Date(nextTimestampInput.value).getTime() / 1000
-            ),
-          };
-
-          // Update parent hash field in the next block
-        //   nextParentHashInput.value = currentParentHash;
-
-          // Recompute hash
-          const nextHash = await computeEthereumBlockHash(updatedNextBlock);
-          const prevNextHash = nextHashInput.value;
-          nextHashInput.value = nextHash;
-
-          currentParentHash = nextHash;
-
-          if (nextHash === prevNextHash) break; // Stop if no change further
-          j++;
-        }
-      }
-
-      previousHash = recalculatedHash;
-    }
-
-    // Validation phase
-    for (let i = 1; i < blocksDivs.length; i++) {
-      const currentBlockDiv = blocksDivs[i];
-      const expectedParentHash = blocksDivs[i - 1].querySelector(".hash").value;
-      const actualParentHash =
-        currentBlockDiv.querySelector(".parent-hash").value;
-
-      if (actualParentHash !== expectedParentHash) {
-        console.warn("Parent hash mismatch at block", i);
-        currentBlockDiv.classList.add("bg-danger");
-      } else {
-        currentBlockDiv.style.borderColor = "";
-      }
-    }
+// helper: turn a card into a minimal header object
+function headerFromCard(div, originalHeader) {
+  return {
+    ...originalHeader,                           // untouched fields
+    parentHash : div.querySelector(".parent-hash").value,
+    miner      : div.querySelector(".miner").value,
+    number     : +div.querySelector(".block-number").value,
+    timestamp  : Math.floor(
+                   new Date(div.querySelector(".timestamp").value).getTime()/1000
+                 )
   };
+}
 
-  // Attach event listeners to inputs
-  blocksDivs.forEach((blockDiv) => {
-    console.log(`Attaching input listeners to block div ${blockDiv.querySelector(".block-number").value}`);
-    const inputs = blockDiv.querySelectorAll("input");
-    inputs.forEach((input) => {
-      input.addEventListener("input", recalculateAndValidate);
-    });
+const recalculateAndValidate = async (e) => {
+  // index of the card whose <input> actually fired the event
+  const editedCard   = e ? [...blocksDivs].indexOf(e.currentTarget.closest('.block'))
+                         : -1;
+
+  /* 1. First pass – re-hash everything, but do NOT write back */
+  const newHashes = [];
+  for (let i = 0; i < blocksDivs.length; i++) {
+    newHashes[i] = await computeEthereumBlockHash(
+      headerFromCard(blocksDivs[i], blocks[i])
+    );
+  }
+
+  /* 2. Second pass – overwrite hash field only for the edited card and all that follow */
+  if (editedCard >= 0) {
+    for (let i = editedCard; i < blocksDivs.length; i++) {
+      blocksDivs[i].querySelector('.hash').value = newHashes[i];
+    }
+  }
+
+  /* 3. Validation colouring */
+for (let i = 0; i < blocksDivs.length; i++) {
+  const card = blocksDivs[i];
+
+  if (i === 0) {                      // genesis / first loaded card
+    card.classList.remove('bg-danger');
+    card.classList.add   ('bg-light');
+    continue;
+  }
+
+  /* use the HASH VALUE CURRENTLY DISPLAYED in the previous card */
+  const prevHashDOM = blocksDivs[i - 1]
+                        .querySelector('.hash').value.trim();
+  const parentHash  = card.querySelector('.parent-hash').value.trim();
+
+  if (parentHash !== prevHashDOM) {
+    card.classList.add   ('bg-danger');
+    card.classList.remove('bg-light');
+  } else {
+    card.classList.remove('bg-danger');
+    card.classList.add   ('bg-light');
+  }
+}
+};
+
+/* attach listener */
+blocksDivs.forEach(div => {
+  div.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('input', recalculateAndValidate);
   });
+});
+
+
+
+//   // Attach event listeners to inputs
+//   blocksDivs.forEach((blockDiv) => {
+//     console.log(`Attaching input listeners to block div ${blockDiv.querySelector(".block-number").value}`);
+//     const inputs = blockDiv.querySelectorAll("input");
+//     inputs.forEach((input) => {
+//       input.addEventListener("input", recalculateAndValidate);
+//     });
+//   });
 };
 
 // -------------------- STATE UPDATES --------------------

@@ -43,9 +43,9 @@ import { WalletService } from '../../services/wallet.service';
             <tbody>
               <tr 
                 *ngFor="let entry of leaderboard$ | async; trackBy: trackByAddress"
-                class="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                class="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-100 transition-colors"
                 [class.bg-yellow-50]="isCurrentUser(entry.address)"
-                [class.dark:bg-yellow-900]="isCurrentUser(entry.address)"
+                [class.dark:bg-yellow-100]="isCurrentUser(entry.address)"
               >
                 <td class="px-4 py-3">
                   <div class="flex items-center">

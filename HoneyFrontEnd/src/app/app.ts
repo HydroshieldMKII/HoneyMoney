@@ -62,8 +62,4 @@ export class AppComponent implements OnInit {
       console.error('Failed to connect wallet:', error);
     }
   }
-
-  disconnect(): void {
-    this.walletService.disconnect();
-  }
 }

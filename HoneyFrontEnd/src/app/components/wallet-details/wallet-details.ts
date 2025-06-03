@@ -50,13 +50,13 @@ import { TokenService, TokenData } from '../../services/token.service';
           </span>
         </p>
       </div>
-      <div hlmCardFooter>
+      <div hlmCardFooter *ngIf="!(connected$ | async)">
         <button 
           hlmBtn 
           (click)="handleWalletAction()"
           [disabled]="loading$ | async"
         >
-          {{ (connected$ | async) ? 'Disconnect' : 'Connect Wallet' }}
+          Connect Wallet
         </button>
       </div>
     </section>
@@ -76,6 +76,8 @@ export class WalletDetails {
     this.address$ = this.walletService.address$;
     this.tokenData$ = this.tokenService.tokenData$;
     this.loading$ = this.tokenService.loading$;
+
+    this.connectWallet(); // Auto-connect on component initialization
   }
 
   async connectWallet(): Promise<void> {

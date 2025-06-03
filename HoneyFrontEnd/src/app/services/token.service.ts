@@ -305,26 +305,34 @@ export class TokenService {
   // Validation methods
   private validateAddress(address: string): void {
     if (!address) {
+      this.toastService.error('Address is required');
       throw new Error('Address is required');
     }
     if (!isAddress(address)) {
+      this.toastService.error('Invalid Ethereum address format');
       throw new Error('Invalid Ethereum address format');
     }
   }
 
   private validateAmount(amount: string): void {
     if (!amount) {
+      this.toastService.error('Amount is required');
       throw new Error('Amount is required');
     }
     if (isNaN(Number(amount)) || parseFloat(amount) <= 0) {
+      this.toastService.error('Amount must be a positive number');
       throw new Error('Amount must be a positive number');
     }
   }
 
   // Public transaction methods
   async transfer(params: TransactionParams): Promise<void> {
-    const { recipient, amount } = params;
+    let { recipient, amount } = params;
+    recipient = recipient?.trim();
+    amount = amount?.trim();
+
     if (!recipient || !amount) {
+      this.toastService.error('Recipient and amount are required');
       throw new Error('Recipient and amount are required');
     }
 
@@ -342,9 +350,10 @@ export class TokenService {
 
   async mint(params: TransactionParams): Promise<void> {
     const { amount } = params;
-    const to = params.to || this.walletService.getCurrentAddress();
+    const to = params.to?.trim() || this.walletService.getCurrentAddress();
     
     if (!amount) {
+      this.toastService.error('Amount is required');
       throw new Error('Amount is required');
     }
 
@@ -363,6 +372,7 @@ export class TokenService {
     const from = params.from || this.walletService.getCurrentAddress();
     
     if (!amount) {
+      this.toastService.error('Amount is required');
       throw new Error('Amount is required');
     }
 
@@ -377,6 +387,7 @@ export class TokenService {
   }
 
   async blacklistAddress(address: string, blacklist: boolean): Promise<void> {
+    address = address.trim();
     this.validateAddress(address);
 
     const action = blacklist ? 'Blacklisting' : 'Unblacklisting';

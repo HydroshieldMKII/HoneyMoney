@@ -220,27 +220,18 @@ export class TokenOperationsComponent {
   }
 
   async onSend(): Promise<void> {
-    if (!this.sendForm.recipient || !this.sendForm.amount) {
-      this.toastService.error('Please fill in all fields');
-      return;
-    }
-
     try {
       await this.tokenService.transfer({
-        recipient: this.sendForm.recipient.trim(),
+        recipient: this.sendForm.recipient,
         amount: String(this.sendForm.amount)
       });
       this.sendForm = { recipient: '', amount: '' };
     } catch (error: any) {
-      console.error('Send failed:', error);
+      console.warn('Send failed:', error);
     }
   }
 
   async onMint(): Promise<void> {
-    if (!this.mintForm.amount) {
-      return;
-    }
-
     try {
       await this.tokenService.mint({
         to: this.mintForm.to,
@@ -248,12 +239,13 @@ export class TokenOperationsComponent {
       });
       this.mintForm = { to: '', amount: '' };
     } catch (error: any) {
-      console.error('Mint failed:', error);
+      console.warn('Mint failed:', error);
     }
   }
 
   async onBurn(): Promise<void> {
     if (!this.burnForm.amount) {
+      this.toastService.error('Please specify an amount to burn');
       return;
     }
 
@@ -264,12 +256,13 @@ export class TokenOperationsComponent {
       });
       this.burnForm = { from: '', amount: '' };
     } catch (error: any) {
-      console.error('Burn failed:', error);
+      console.warn('Burn failed:', error);
     }
   }
 
   async onBlacklist(): Promise<void> {
     if (!this.blacklistForm.address) {
+      this.toastService.error('Please specify an address to blacklist');
       return;
     }
 
@@ -277,12 +270,13 @@ export class TokenOperationsComponent {
       await this.tokenService.blacklistAddress(this.blacklistForm.address, true);
       this.blacklistForm = { address: '' };
     } catch (error: any) {
-      console.error('Blacklist failed:', error);
+      console.warn('Blacklist failed:', error);
     }
   }
 
   async onUnblacklist(): Promise<void> {
     if (!this.blacklistForm.address) {
+      this.toastService.error('Please specify an address to unblacklist');
       return;
     }
 
@@ -290,7 +284,7 @@ export class TokenOperationsComponent {
       await this.tokenService.blacklistAddress(this.blacklistForm.address, false);
       this.blacklistForm = { address: '' };
     } catch (error: any) {
-      console.error('Unblacklist failed:', error);
+      console.warn('Unblacklist failed:', error);
     }
   }
 
@@ -298,7 +292,7 @@ export class TokenOperationsComponent {
     try {
       await this.tokenService.clearBlacklist();
     } catch (error: any) {
-      console.error('Clear blacklist failed:', error);
+      console.warn('Clear blacklist failed:', error);
     }
   }
 }

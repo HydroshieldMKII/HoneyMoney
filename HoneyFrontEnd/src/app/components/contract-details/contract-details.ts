@@ -51,7 +51,7 @@ import { WalletService } from '../../services/wallet.service';
           </p>
           <p><strong>Pause State:</strong> 
             <span [class]="(tokenData$ | async)?.isPaused ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'">
-              {{ (tokenData$ | async)?.isPaused ? 'Paused' : 'Active' }}
+              {{ (tokenData$ | async)?.isPaused ? 'Paused enabled' : 'not active' }}
             </span>
           </p>
           <p><strong>Token Name:</strong> 

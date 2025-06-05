@@ -91,9 +91,9 @@ contract HoneyMoney is ERC20 {
 
     // Check if an address is blacklisted for the caller
     function isBlacklisted(address account) public view returns (bool) {
-        address[] storage blacklist = blackListedAddresses[msg.sender];
-        for (uint i = 0; i < blacklist.length; i++) {
-            if (blacklist[i] == account) {
+        address[] storage userBlacklist = blackListedAddresses[msg.sender];
+        for (uint i = 0; i < userBlacklist.length; i++) {
+            if (userBlacklist[i] == account) {
                 return true;
             }
         }

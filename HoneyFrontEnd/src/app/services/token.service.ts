@@ -339,7 +339,6 @@ export class TokenService {
     this.validateAddress(recipient);
     this.validateAmount(amount);
 
-    console.log(`Transferring ${amount} tokens to ${recipient}`);
 
     await this.executeTransaction(
       () => this.tokenContract!['transfer'](recipient, parseUnits(amount, 18)),

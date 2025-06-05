@@ -86,7 +86,6 @@ export class WalletService {
       this.provider$.next(provider);
       this.signer$.next(signer);
 
-      console.log('Wallet connected:', address);
     } catch (error: any) {
       console.error('Failed to connect wallet:', error);
       throw new Error(`Failed to connect wallet: ${error.message}`);
@@ -108,7 +107,6 @@ export class WalletService {
     this.provider$.next(null);
     this.signer$.next(null);
 
-    console.log('Wallet disconnected');
   }
 
   private updateAddress(newAddress: string): void {

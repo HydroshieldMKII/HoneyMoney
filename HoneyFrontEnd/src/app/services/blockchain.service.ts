@@ -134,18 +134,9 @@ async loadBlocks(): Promise<void> {
         true,
       ]);
       
-      console.log(`Raw block ${i}:`, block);
-      
       if (block.transactions && block.transactions.length > 0) {
-        console.log(`Block ${i} transactions:`, block.transactions);
         block.transactions.forEach((tx: any, idx: number) => {
-          console.log(`  Transaction ${idx}:`, {
-            from: tx.from,
-            to: tx.to,
-            input: tx.input,
-            value: tx.value,
-            hash: tx.hash
-          });
+          // Transaction processing
         });
       }
       
@@ -159,11 +150,10 @@ async loadBlocks(): Promise<void> {
       });
     }
 
-    console.log('Loaded blocks:', blocks.length, 'latest block number:', latest);
     this.blocksSubject.next(blocks);
     
     // Create editable blocks
-    const editableBlocks = blocks.map(block => this.hashingService.createEditableBlock(block));
+    const editableBlocks = await Promise.all(blocks.map(block => this.hashingService.createEditableBlock(block)));
     this.editableBlocksSubject.next(editableBlocks);
     
     // Complete progress
@@ -205,7 +195,7 @@ async loadBlocks(): Promise<void> {
   }
 }
 
-  private formatBlockData(block: any): BlockData {
+  public formatBlockData(block: any): BlockData {
     return {
       number: parseInt(block.number, 16).toString(),
       timestamp: new Date(parseInt(block.timestamp, 16) * 1000).toISOString(),
@@ -244,14 +234,11 @@ async loadBlocks(): Promise<void> {
       gasLimit = tx.gas ? parseInt(tx.gas, 16).toString() : '0';
       gasPrice = tx.gasPrice ? formatUnits(tx.gasPrice, 'gwei') : '0';
 
-      console.log('Raw transaction:', tx);
-      console.log('Transaction input:', tx.input);
 
       try {
         if (tx.input && tx.input !== '0x' && tx.input.length > 2) {
           const iface = new Interface(this.tokenABI);
 
-          console.log('Attempting to parse transaction with input:', tx.input);
 
           const parsed = iface.parseTransaction({
             data: tx.input,
@@ -260,30 +247,23 @@ async loadBlocks(): Promise<void> {
 
           if (parsed) {
             functionName = parsed.name;
-            console.log('Successfully parsed transaction:', parsed);
-            console.log('Parsed args:', parsed.args);
-            console.log('Function fragment:', parsed.fragment);
 
             // Get parameter names from the function fragment
             const paramNames = parsed.fragment.inputs.map(
               (input) => input.name
             );
-            console.log('Parameter names from ABI:', paramNames);
 
             // Map numeric indices to parameter names or create descriptive names
             const entries = Object.entries(parsed.args);
-            console.log('All entries:', entries);
 
             decodedArgs = entries
               .filter(([key]) => !isNaN(Number(key))) // Only process numeric keys
               .reduce((acc, [key, value], index) => {
-                console.log(`Processing arg: ${key} = ${value}`);
 
                 // Use parameter name from ABI if available, otherwise create descriptive name
                 let paramName =
                   paramNames[parseInt(key)] ||
                   this.getParameterName(functionName, index);
-                console.log(`Parameter name: ${paramName}`);
 
                 let formattedValue: string;
 
@@ -295,7 +275,6 @@ async loadBlocks(): Promise<void> {
                     formattedValue =
                       formatUnits(value as bigint, 18) + ' tokens';
                   } catch (error) {
-                    console.log('Error formatting amount:', error);
                     formattedValue = (value as any).toString();
                   }
                 } else if (typeof value === 'boolean') {
@@ -304,19 +283,13 @@ async loadBlocks(): Promise<void> {
                   formattedValue = (value as any).toString();
                 }
 
-                console.log(
-                  `Formatted value for ${paramName}: ${formattedValue}`
-                );
                 acc[paramName] = formattedValue;
                 return acc;
               }, {} as { [key: string]: any });
 
-            console.log('Final decoded args:', decodedArgs);
           } else {
-            console.log('Failed to parse transaction - parsed is null');
           }
         } else {
-          console.log('Transaction has no input data or empty input');
           functionName = 'Contract Deployment or ETH Transfer';
         }
       } catch (error) {
@@ -422,33 +395,36 @@ async loadBlocks(): Promise<void> {
   /**
    * Update a specific field in a block and recalculate hashes
    */
-  updateBlockField(blockIndex: number, field: keyof BlockData, value: string): void {
+  async updateBlockField(blockIndex: number, field: keyof BlockData, value: string): Promise<void> {
     const editableBlocks = this.editableBlocksSubject.value;
     
     if (editableBlocks[blockIndex]) {
       // Update the field
       (editableBlocks[blockIndex] as any)[field] = value;
       
-      // Recalculate blockchain with new hash
-      const updatedBlocks = this.hashingService.recalculateBlockchain(editableBlocks, blockIndex);
+      // Mark block as modified
+      editableBlocks[blockIndex].isModified = true;
+      
+      // Recalculate blockchain with new hash using SHA256
+      const updatedBlocks = await this.hashingService.recalculateBlockchain(editableBlocks, blockIndex);
       this.editableBlocksSubject.next(updatedBlocks);
       
       // Show feedback
-      this.toastService.info('Block Updated', `${field} has been updated and hashes recalculated`);
+      this.toastService.info('Block Updated', `${field} has been updated and hashes recalculated using SHA256`);
     }
   }
 
   /**
    * Save changes for a block (finalize edit mode)
    */
-  saveBlockChanges(blockIndex: number): void {
+  async saveBlockChanges(blockIndex: number): Promise<void> {
     const editableBlocks = this.editableBlocksSubject.value;
     
     if (editableBlocks[blockIndex]) {
       editableBlocks[blockIndex].isEditing = false;
       this.editableBlocksSubject.next([...editableBlocks]);
       
-      const validation = this.hashingService.getValidationStatus(editableBlocks);
+      const validation = await this.hashingService.getValidationStatus(editableBlocks);
       
       if (validation.status === 'valid') {
         this.toastService.success('Changes Saved', 'Block changes saved and blockchain is valid');
@@ -461,17 +437,17 @@ async loadBlocks(): Promise<void> {
   /**
    * Cancel changes for a block (restore original data)
    */
-  cancelBlockChanges(blockIndex: number): void {
+  async cancelBlockChanges(blockIndex: number): Promise<void> {
     const editableBlocks = this.editableBlocksSubject.value;
     
     if (editableBlocks[blockIndex]) {
       // Restore original data
-      const restoredBlock = this.hashingService.restoreOriginalData(editableBlocks[blockIndex]);
+      const restoredBlock = await this.hashingService.restoreOriginalData(editableBlocks[blockIndex]);
       editableBlocks[blockIndex] = restoredBlock;
       
       // Recalculate blockchain to fix any cascading changes
-      const updatedBlocks = this.hashingService.recalculateBlockchain(editableBlocks, blockIndex);
-      this.editableBlocksSubject.next(updatedBlocks);
+      // const updatedBlocks = await this.hashingService.recalculateBlockchain(editableBlocks, blockIndex);
+      // this.editableBlocksSubject.next(updatedBlocks);
       
       this.toastService.info('Changes Cancelled', 'Block has been restored to original state');
     }
@@ -480,9 +456,9 @@ async loadBlocks(): Promise<void> {
   /**
    * Restore all blocks to their original state
    */
-  restoreAllBlocks(): void {
+  async restoreAllBlocks(): Promise<void> {
     const editableBlocks = this.editableBlocksSubject.value;
-    const restoredBlocks = editableBlocks.map(block => this.hashingService.restoreOriginalData(block));
+    const restoredBlocks = await Promise.all(editableBlocks.map(block => this.hashingService.restoreOriginalData(block)));
     
     this.editableBlocksSubject.next(restoredBlocks);
     this.toastService.success('All Blocks Restored', 'All blocks have been restored to their original state');
@@ -491,21 +467,21 @@ async loadBlocks(): Promise<void> {
   /**
    * Get validation status for the current blockchain
    */
-  getValidationStatus(): {
+  async getValidationStatus(): Promise<{
     status: 'valid' | 'invalid' | 'mixed';
     message: string;
     details: string[];
-  } {
+  }> {
     const editableBlocks = this.editableBlocksSubject.value;
-    return this.hashingService.getValidationStatus(editableBlocks);
+    return await this.hashingService.getValidationStatus(editableBlocks);
   }
 
   /**
    * Enhanced blockchain validation that uses the hashing service
    */
-  validateEditableBlockchain(): { isValid: boolean; invalidBlocks: number[]; hashMismatches: number[] } {
+  async validateEditableBlockchain(): Promise<{ isValid: boolean; invalidBlocks: number[]; hashMismatches: number[] }> {
     const editableBlocks = this.editableBlocksSubject.value;
-    return this.hashingService.validateBlockchain(editableBlocks);
+    return await this.hashingService.validateBlockchain(editableBlocks);
   }
 
   /**

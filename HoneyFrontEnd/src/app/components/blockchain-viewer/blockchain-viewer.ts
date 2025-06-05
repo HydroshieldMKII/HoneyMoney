@@ -17,6 +17,7 @@ import {
   LoadingProgress,
 } from '../../services/blockchain.service';
 import { WalletService } from '../../services/wallet.service';
+import { HashingService } from '../../services/hashing.service';
 import { BlockchainLoadingProgressComponent } from './blockchain-loading-progress';
 import { BlockEditorComponent } from '../block-editor/block-editor';
 import { EditableBlockData } from '../../services/hashing.service';
@@ -409,10 +410,18 @@ export class BlockchainViewerComponent implements OnInit {
   currentSlide = 0;
   showDetails: boolean[] = [];
   Object = Object; // Make Object available in template
+  validationStatus: {
+    status: 'valid' | 'invalid' | 'mixed';
+    message: string;
+    details: string[];
+  } | null = null;
+  
+  private hasDebugged = false; // Add flag to prevent infinite loop
 
   constructor(
     private blockchainService: BlockchainService,
-    private walletService: WalletService
+    private walletService: WalletService,
+    private hashingService: HashingService
   ) {
     this.blocks$ = this.blockchainService.blocks$;
     this.editableBlocks$ = this.blockchainService.editableBlocks$;
@@ -422,17 +431,19 @@ export class BlockchainViewerComponent implements OnInit {
     this.progress$ = this.blockchainService.progress$;
   }
 
-  ngOnInit(): void {
-    // Auto-load blocks if wallet is connected
+  async ngOnInit(): Promise<void> {
     if (this.walletService.isConnected()) {
+      // Debug removed to prevent infinite loop during blockchain loading
       this.loadBlocks();
     }
   }
 
+  // FIXED: Remove debug call from loadBlocks
   async loadBlocks(): Promise<void> {
     await this.blockchainService.loadBlocks();
   }
 
+  // REST OF YOUR METHODS STAY THE SAME...
   nextSlide(): void {
     this.blockchainService.blocks$
       .subscribe((blocks) => {
@@ -481,63 +492,104 @@ export class BlockchainViewerComponent implements OnInit {
   }
 
   getFormattedDecodedArgs(decodedArgs: { [key: string]: any }): string {
-    console.log('Formatting decoded args:', decodedArgs);
-
     if (!decodedArgs || Object.keys(decodedArgs).length === 0) {
       return '<div class="text-gray-500 italic">No parameters</div>';
     }
 
-    // Format exactly like the JavaScript version
     const formatted = Object.entries(decodedArgs)
       .map(([key, value]) => {
-        console.log(`Formatting: ${key} = ${value}`);
         return `<div><b>${key}:</b> ${value}</div>`;
       })
       .join('');
 
-    console.log('Final formatted HTML:', formatted);
     return formatted || '<div class="text-gray-500 italic">No parameters</div>';
   }
 
-  // ========== EDITING METHODS ==========
-
-  /**
-   * Get validation status for display
-   */
+  // FIXED: Make getValidationStatus synchronous and check isValidHash properly
   getValidationStatus(): {
     status: 'valid' | 'invalid' | 'mixed';
     message: string;
     details: string[];
   } {
-    return this.blockchainService.getValidationStatus();
+    // Default fallback if no validation status is available
+    const defaultStatus = {
+      status: 'valid' as const,
+      message: 'Blockchain is valid',
+      details: ['All blocks have correct hashes']
+    };
+
+    // Get the current blocks synchronously
+    let currentBlocks: any[] = [];
+    this.editableBlocks$.subscribe(blocks => {
+      currentBlocks = blocks || [];
+    }).unsubscribe();
+
+    if (currentBlocks.length === 0) {
+      return defaultStatus;
+    }
+
+    // Check which blocks have invalid hashes
+    const invalidHashBlocks: number[] = [];
+    const brokenChainBlocks: number[] = [];
+
+    for (let i = 0; i < currentBlocks.length; i++) {
+      const block = currentBlocks[i];
+      const blockNumber = parseInt(block.number);
+
+      // Check hash validity
+      if (!block.isValidHash) {
+        invalidHashBlocks.push(blockNumber);
+      }
+
+      // Check parent hash linkage (skip genesis block)
+      if (i > 0) {
+        const previousBlock = currentBlocks[i - 1];
+        if (block.parentHash !== previousBlock.hash) {
+          brokenChainBlocks.push(blockNumber);
+        }
+      }
+    }
+
+    const isValid = invalidHashBlocks.length === 0 && brokenChainBlocks.length === 0;
+    const details: string[] = [];
+
+    if (isValid) {
+      details.push('All blocks have correct hashes');
+      details.push('All parent hash references are correct');
+    } else {
+      if (invalidHashBlocks.length > 0) {
+        details.push(`Blocks with invalid hashes: ${invalidHashBlocks.join(', ')}`);
+      }
+      if (brokenChainBlocks.length > 0) {
+        details.push(`Blocks with broken parent hash chain: ${brokenChainBlocks.join(', ')}`);
+      }
+    }
+
+    // console.log('Blockchain validation details:', { isValid, invalidHashBlocks, brokenChainBlocks });
+
+    return {
+      status: isValid ? 'valid' : 'invalid',
+      message: isValid ? 'Blockchain is valid' : 'Blockchain integrity compromised',
+      details
+    };
   }
 
-  /**
-   * Toggle edit mode for a block
-   */
   toggleEditMode(blockIndex: number): void {
     this.blockchainService.toggleEditMode(blockIndex);
   }
 
-  /**
-   * Handle block save event
-   */
   onBlockSaved(): void {
     // Block has been saved, refresh validation status
     console.log('Block saved successfully');
+    this.blockchainService.getValidationStatus(); // Refresh validation status
   }
 
-  /**
-   * Handle block cancel event
-   */
   onBlockCancelled(): void {
     // Block editing was cancelled
     console.log('Block editing cancelled');
+    this.blockchainService.getValidationStatus(); // Refresh validation status
   }
 
-  /**
-   * Restore all blocks to original state
-   */
   restoreAllBlocks(): void {
     this.blockchainService.restoreAllBlocks();
   }

@@ -53,7 +53,7 @@ import { EditableBlockData } from '../../services/hashing.service';
             [disabled]="loading$ | async"
             variant="default"
           >
-            {{ (loading$ | async) ? 'Loading...' : 'Refresh Blocks' }}
+            {{ (loading$ | async) ? 'Loading...' : 'Force refresh blocks' }}
           </button>
         </div>
       </div>
@@ -133,6 +133,8 @@ import { EditableBlockData } from '../../services/hashing.service';
             </button>
           </div>
         </div>
+
+        <hr class="my-6 border-yellow-200 dark:border-yellow-700" />
 
         <!-- Blocks Carousel -->
         <div class="relative" *ngIf="(editableBlocks$ | async)?.length">
@@ -415,8 +417,6 @@ export class BlockchainViewerComponent implements OnInit {
     message: string;
     details: string[];
   } | null = null;
-  
-  private hasDebugged = false; // Add flag to prevent infinite loop
 
   constructor(
     private blockchainService: BlockchainService,
@@ -505,7 +505,7 @@ export class BlockchainViewerComponent implements OnInit {
     return formatted || '<div class="text-gray-500 italic">No parameters</div>';
   }
 
-  // FIXED: Make getValidationStatus synchronous and check isValidHash properly
+  // FIXED TODO: Make getValidationStatus synchronous and check isValidHash properly
   getValidationStatus(): {
     status: 'valid' | 'invalid' | 'mixed';
     message: string;
@@ -562,6 +562,9 @@ export class BlockchainViewerComponent implements OnInit {
       }
       if (brokenChainBlocks.length > 0) {
         details.push(`Blocks with broken parent hash chain: ${brokenChainBlocks.join(', ')}`);
+      }else{
+        //use the first invalid hash block as a reference
+        details.push(`First invalid hash block: ${invalidHashBlocks[0]}`);
       }
     }
 

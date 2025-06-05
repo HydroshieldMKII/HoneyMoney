@@ -415,26 +415,6 @@ async loadBlocks(): Promise<void> {
   }
 
   /**
-   * Save changes for a block (finalize edit mode)
-   */
-  async saveBlockChanges(blockIndex: number): Promise<void> {
-    const editableBlocks = this.editableBlocksSubject.value;
-    
-    if (editableBlocks[blockIndex]) {
-      editableBlocks[blockIndex].isEditing = false;
-      this.editableBlocksSubject.next([...editableBlocks]);
-      
-      const validation = await this.hashingService.getValidationStatus(editableBlocks);
-      
-      if (validation.status === 'valid') {
-        this.toastService.success('Changes Saved', 'Block changes saved and blockchain is valid');
-      } else {
-        this.toastService.warning('Changes Saved', 'Block changes saved but blockchain integrity is compromised');
-      }
-    }
-  }
-
-  /**
    * Cancel changes for a block (restore original data)
    */
   async cancelBlockChanges(blockIndex: number): Promise<void> {
@@ -449,7 +429,7 @@ async loadBlocks(): Promise<void> {
       // const updatedBlocks = await this.hashingService.recalculateBlockchain(editableBlocks, blockIndex);
       // this.editableBlocksSubject.next(updatedBlocks);
       
-      this.toastService.info('Changes Cancelled', 'Block has been restored to original state');
+      // this.toastService.info('Changes Cancelled', 'Block has been restored to original state');
     }
   }
 

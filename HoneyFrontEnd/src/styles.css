@@ -118,6 +118,12 @@
   button[variant="default"]:hover::before {
     left: 100%;
   }
+
+  button[variant="outline"] {
+    border: 2px solid hsl(var(--honey-dark));
+    color: hsl(var(--honey-dark));
+    background: hsl(var(--honey-light));
+  }
 }
 
 @layer components {

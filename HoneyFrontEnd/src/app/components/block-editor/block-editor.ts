@@ -46,16 +46,7 @@ import { BlockchainService, BlockData } from '../../services/blockchain.service'
               (click)="cancelEdit()"
               type="button"
             >
-              Cancel
-            </button>
-            <button
-              hlmBtn
-              variant="default"
-              size="sm"
-              (click)="saveEdit()"
-              type="button"
-            >
-              Save Changes
+              Stop Editing
             </button>
           </div>
         </div>
@@ -260,7 +251,7 @@ export class BlockEditorComponent implements OnInit, OnDestroy {
 
   constructor(
     private fb: FormBuilder,
-    private blockchainService: BlockchainService
+    private blockchainService: BlockchainService,
   ) {}
 
   ngOnInit(): void {
@@ -375,86 +366,10 @@ export class BlockEditorComponent implements OnInit, OnDestroy {
     });
   }
 
-  saveEdit(): void {
-    if (this.blockForm.valid) {
-      const formValue = this.blockForm.value;
-      
-      // Check if timestamp was actually changed by comparing the dates
-      let timestampToUse = this.block.timestamp;
-      if (formValue.timestamp) {
-        const originalDate = new Date(this.block.timestamp);
-        const formDate = new Date(formValue.timestamp);
-        
-        // Compare year, month, day, hour, minute (ignore seconds and milliseconds)
-        const originalTruncated = new Date(
-          originalDate.getFullYear(),
-          originalDate.getMonth(),
-          originalDate.getDate(),
-          originalDate.getHours(),
-          originalDate.getMinutes()
-        );
-        const formTruncated = new Date(
-          formDate.getFullYear(),
-          formDate.getMonth(),
-          formDate.getDate(),
-          formDate.getHours(),
-          formDate.getMinutes()
-        );
-        
-        // Only update timestamp if the datetime-local value represents a different time
-        if (originalTruncated.getTime() !== formTruncated.getTime()) {
-          timestampToUse = formDate.toISOString();
-        }
-      }
-
-      const updatedData = {
-        ...formValue,
-        timestamp: timestampToUse,
-        number: this.block.number, // Keep original number
-      };
-
-      // Valid BlockData fields that can be updated
-      const validFields = [
-        'timestamp', 'miner', 'parentHash', 'gasLimit', 'gasUsed', 
-        'difficulty', 'nonce', 'extraData', 'stateRoot', 'transactionsRoot', 
-        'receiptsRoot', 'mixHash', 'sha3Uncles'
-      ];
-
-      // Check if any fields have actually changed by comparing exact values
-      let hasChanges = false;
-      validFields.forEach(key => {
-        const currentValue = (this.block as any)[key];
-        const newValue = updatedData[key];
-        if (currentValue !== newValue) {
-          hasChanges = true;
-        }
-      });
-
-      // Only proceed if there are actual changes
-      if (hasChanges) {
-        validFields.forEach(key => {
-          if (updatedData[key] !== (this.block as any)[key]) {
-            this.blockchainService.updateBlockField(
-              this.blockIndex, 
-              key as keyof BlockData, 
-              updatedData[key]
-            );
-          }
-        });
-        this.blockchainService.saveBlockChanges(this.blockIndex);
-        this.save.emit();
-      } else {
-        // No changes were made, just close the editor
+  cancelEdit(): void {
         this.blockchainService.cancelBlockChanges(this.blockIndex);
         this.cancel.emit();
-      }
     }
-  }
-
-  cancelEdit(): void {
-    this.blockchainService.cancelBlockChanges(this.blockIndex);
-    this.cancel.emit();
-  }
 
   restoreOriginal(): void {
     this.blockchainService.cancelBlockChanges(this.blockIndex);

@@ -12,6 +12,7 @@ import { ContractDetails } from './components/contract-details/contract-details'
 import { TokenOperationsComponent } from './components/token-operations/token-operations';
 import { LeaderboardComponent } from './components/leaderboard/leaderboard';
 import { BlockchainViewerComponent } from './components/blockchain-viewer/blockchain-viewer';
+import { BlockchainPresentationComponent } from './components/blockchain-presentation/blockchain-presentation';
 
 @Component({
   selector: 'app-root',
@@ -23,6 +24,7 @@ import { BlockchainViewerComponent } from './components/blockchain-viewer/blockc
     TokenOperationsComponent,
     LeaderboardComponent,
     BlockchainViewerComponent,
+    BlockchainPresentationComponent,
     HlmToasterComponent
   ],
   templateUrl: './app.html'
@@ -32,6 +34,7 @@ export class AppComponent implements OnInit {
   connected$: Observable<boolean>;
   address$: Observable<string>;
   loading$: Observable<boolean>;
+  showMainApp: boolean = true;
 
   constructor(
     private walletService: WalletService,

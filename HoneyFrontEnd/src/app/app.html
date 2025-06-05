@@ -1,9 +1,33 @@
-<h1 class="text-center my-4 text-xl">🐝 HoneyMoney Smart Contract 🍯</h1>
-<app-wallet-details></app-wallet-details>
-<app-contract-details></app-contract-details>
-<app-token-operations></app-token-operations>
-<app-leaderboard></app-leaderboard>
-<app-blockchain-viewer></app-blockchain-viewer>
+<nav class="bg-gray-800 text-white p-4 mb-6">
+  <div class="container mx-auto flex justify-between items-center">
+    <h1 class="text-xl font-bold">🐝 HoneyMoney Smart Contract 🍯</h1>
+    <div class="flex space-x-4">
+      <button 
+        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition-colors"
+        (click)="showMainApp = true"
+        [class.bg-blue-800]="showMainApp">
+        Main App
+      </button>
+      <button 
+        class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded transition-colors"
+        (click)="showMainApp = false"
+        [class.bg-yellow-800]="!showMainApp">
+        📊 Présentation Blockchain
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div *ngIf="showMainApp" class="container mx-auto px-4">
+  <app-wallet-details></app-wallet-details>
+  <app-contract-details></app-contract-details>
+  <app-token-operations></app-token-operations>
+  <app-leaderboard></app-leaderboard>
+  <app-blockchain-viewer></app-blockchain-viewer>
+</div>
+
+<div *ngIf="!showMainApp" class="w-full" style="height: calc(100vh - 80px);">
+  <app-blockchain-presentation></app-blockchain-presentation>
+</div>
 
 <hlm-toaster />
-<!-- <router-outlet /> -->

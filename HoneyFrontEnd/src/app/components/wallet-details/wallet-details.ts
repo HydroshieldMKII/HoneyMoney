@@ -77,7 +77,7 @@ export class WalletDetails {
     this.tokenData$ = this.tokenService.tokenData$;
     this.loading$ = this.tokenService.loading$;
 
-    this.connectWallet(); // Auto-connect on component initialization
+    this.connectWallet(); // Auto-connect on start
   }
 
   async connectWallet(): Promise<void> {

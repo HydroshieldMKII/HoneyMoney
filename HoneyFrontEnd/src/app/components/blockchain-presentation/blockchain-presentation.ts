@@ -14,7 +14,7 @@ declare var Reveal: any;
           <!-- Title Slide -->
           <section>
             <h1>Comment fonctionne la Blockchain</h1>
-            <h3>Un guide complet sur la technologie des registres distribués</h3>
+            <!-- <h3>Un guide complet sur la technologie des registres distribués</h3> -->
             <p style="text-align: center;">
               <small>Comprendre les fondamentaux de la technologie blockchain</small>
             </p>
@@ -24,7 +24,7 @@ declare var Reveal: any;
           <section>
             <h2>Qu'est-ce que la Blockchain ?</h2>
             <ul>
-              <li class="fragment">Une technologie de <span class="highlight">registre distribué</span></li>
+              <li class="fragment">Technologie de <span class="highlight">registre distribué</span></li>
               <li class="fragment">Chaîne de <span class="highlight">blocs liés cryptographiquement</span></li>
               <li class="fragment"><span class="highlight">Décentralisée</span> et immuable</li>
               <li class="fragment">Maintient un <span class="highlight">enregistrement chronologique</span> des transactions</li>
@@ -44,9 +44,7 @@ declare var Reveal: any;
                 <p><strong>Nonce :</strong> 1,234,567</p>
                 <hr>
                 <h4>Données de Transaction</h4>
-                <p>• Transaction 1 : Alice → Bob (5 BTC)</p>
-                <p>• Transaction 2 : Charlie → David (2 BTC)</p>
-                <p>• Transaction 3 : Eve → Frank (1 BTC)</p>
+                <p>• Transaction 1 : Alice → Bob (5 ETH)</p>
               </div>
             </div>
           </section>
@@ -71,6 +69,12 @@ declare var Reveal: any;
                 <strong>Bloc 3</strong><br>
                 Prec: <span class="block-hash">0xdef456...</span><br>
                 Hash: <span class="block-hash">0x789xyz...</span>
+              </div>
+              <span class="arrow">→</span>
+              <div class="blockchain-block">
+                <strong>Bloc 4</strong><br>
+                Prec: <span class="block-hash">0x789xyz...</span><br>
+                Hash: <span class="block-hash">0x123abc...</span>
               </div>
             </div>
             <p class="fragment" style="text-align: center; margin-top: 30px;">
@@ -98,7 +102,7 @@ declare var Reveal: any;
 
           <!-- Mining and Proof of Work -->
           <section>
-            <h2>Minage et Preuve de Travail</h2>
+            <h2>Minage et Proof of work</h2>
             <ul>
               <li class="fragment">Les mineurs rivalisent pour résoudre des <span class="highlight">énigmes informatiques</span></li>
               <li class="fragment">Trouver un nonce qui fait commencer le hash du bloc par des zéros</li>
@@ -121,16 +125,15 @@ declare var Reveal: any;
           <section>
             <h2>Réseau Décentralisé</h2>
             <div style="text-align: center;">
-              <div class="network-node consensus-animation">Nœud</div>
-              <div class="network-node consensus-animation">Nœud</div>
-              <div class="network-node consensus-animation">Nœud</div>
-              <div class="network-node consensus-animation">Nœud</div>
-              <div class="network-node consensus-animation">Nœud</div>
+              <div class="network-node consensus-animation">Node</div>
+              <div class="network-node consensus-animation">Node</div>
+              <div class="network-node consensus-animation">Node</div>
+              <div class="network-node consensus-animation">Node</div>
+              <div class="network-node consensus-animation">Node</div>
             </div>
             <ul style="margin-top: 30px;">
               <li class="fragment">Chaque nœud maintient une <span class="highlight">copie complète</span> de la blockchain</li>
-              <li class="fragment">Les nœuds communiquent de pair à pair</li>
-              <li class="fragment">Aucune autorité centrale ou point de défaillance unique</li>
+              <li class="fragment">Les nœuds communiquent en p2p (peer-to-peer)</li>
               <li class="fragment">Les mécanismes de consensus assurent l'accord</li>
             </ul>
           </section>
@@ -149,7 +152,7 @@ declare var Reveal: any;
                 </ul>
               </div>
               <div class="fragment">
-                <h4>Preuve d'Enjeu (PoS)</h4>
+                <h4>Proof Of Stake (PoS)</h4>
                 <ul>
                   <li>Validateurs choisis par enjeu</li>
                   <li>Efficace énergétiquement</li>
@@ -239,24 +242,7 @@ declare var Reveal: any;
                   <li>Accès restreint</li>
                   <li>Contrôlée par une organisation</li>
                   <li>Plus rapide et efficace</li>
-                </ul>
-              </div>
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;">
-              <div class="fragment">
-                <h4>Blockchain de Consortium</h4>
-                <ul>
-                  <li>Semi-décentralisée</li>
-                  <li>Contrôlée par un groupe</li>
-                  <li>Collaborations industrielles</li>
-                </ul>
-              </div>
-              <div class="fragment">
-                <h4>Blockchain Hybride</h4>
-                <ul>
-                  <li>Mélange public et privé</li>
-                  <li>Transparence sélective</li>
-                  <li>Accès personnalisable</li>
+                  <li>Exemples : Hyperledger</li>
                 </ul>
               </div>
             </div>
@@ -297,8 +283,7 @@ declare var Reveal: any;
                 <h4>Finance</h4>
                 <ul>
                   <li>Crypto-monnaies</li>
-                  <li>Paiements transfrontaliers</li>
-                  <li>Protocoles DeFi</li>
+                  <li>Paiements internationaux</li>
                 </ul>
               </div>
               <div class="fragment">
@@ -330,20 +315,6 @@ declare var Reveal: any;
             </div>
           </section>
 
-          <!-- Future of Blockchain -->
-          <section>
-            <h2>Futur de la Blockchain</h2>
-            <ul>
-              <li class="fragment"><strong>Solutions de Couche 2 :</strong> Lightning Network, Polygon</li>
-              <li class="fragment"><strong>Résistance Quantique :</strong> Cryptographie post-quantique</li>
-              <li class="fragment"><strong>Monnaies Numériques de Banque Centrale (CBDCs)</strong></li>
-              <li class="fragment"><strong>Web3 et Internet Décentralisé</strong></li>
-              <li class="fragment"><strong>Intégration IoT :</strong> Transactions appareil-à-appareil</li>
-              <li class="fragment"><strong>Solutions Environnementales :</strong> Traçage des crédits carbone</li>
-              <li class="fragment"><strong>Métavers :</strong> Économies de mondes virtuels</li>
-            </ul>
-          </section>
-
           <!-- Conclusion -->
           <section>
             <h2>Points Clés à Retenir</h2>
@@ -356,8 +327,8 @@ declare var Reveal: any;
               <li class="fragment">Potentiel de révolutionner de nombreuses industries</li>
             </ul>
             <p class="fragment" style="text-align: center; margin-top: 50px;">
-              <strong style="font-size: 1.5em; color: #FFD700;">Merci !</strong><br>
-              <small>Questions et Discussion</small>
+              <strong style="font-size: 1.5em; color: #FFD700;">Démonstration!</strong><br>
+              <small>Questions?</small>
             </p>
           </section>
         </div>

@@ -367,12 +367,6 @@ export class BlockEditorComponent implements OnInit, OnDestroy {
       transactionGasLimit: [transactionGasLimit],
       transactionGasPrice: [transactionGasPrice],
       transactionInput: [transactionInput],
-      from: [transactionFrom, Validators.required],
-      to: [transactionTo, Validators.required],
-      input: [transactionInput, Validators.required],
-      value: [transactionValue, Validators.required],
-      gas: [transactionGasLimit, Validators.required],
-      gasPrice: [transactionGasPrice, Validators.required],
     });
   }
 
@@ -415,6 +409,38 @@ export class BlockEditorComponent implements OnInit, OnDestroy {
       if (originalTruncated.getTime() !== formTruncated.getTime()) {
         timestampToUse = formDate.toISOString();
       }
+    }
+
+    // Handle transaction updates
+    if (this.block.transactions && this.block.transactions.length > 0) {
+      const transaction = this.block.transactions[0];
+      const transactionFields = ['transactionFrom', 'transactionTo', 'transactionValue', 'transactionGasLimit', 'transactionGasPrice', 'transactionInput'];
+      
+      transactionFields.forEach(field => {
+        if (formValue[field] !== undefined) {
+          const transactionProperty = field.replace('transaction', '').toLowerCase();
+          let propertyName = transactionProperty;
+          
+          // Map form field names to transaction property names
+          if (transactionProperty === 'from') propertyName = 'from';
+          else if (transactionProperty === 'to') propertyName = 'to';
+          else if (transactionProperty === 'value') propertyName = 'value';
+          else if (transactionProperty === 'gaslimit') propertyName = 'gas';
+          else if (transactionProperty === 'gasprice') propertyName = 'gasPrice';
+          else if (transactionProperty === 'input') propertyName = 'input';
+          
+          // Update transaction if value changed
+          if (transaction[propertyName] !== formValue[field]) {
+            console.log(`Updating transaction ${propertyName} from ${transaction[propertyName]} to ${formValue[field]}`);
+            this.blockchainService.updateTransactionField(
+              this.blockIndex,
+              0, // First transaction
+              propertyName,
+              formValue[field]
+            );
+          }
+        }
+      });
     }
 
     // Update each field that has changed

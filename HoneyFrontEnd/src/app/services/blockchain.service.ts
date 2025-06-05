@@ -415,6 +415,28 @@ async loadBlocks(): Promise<void> {
   }
 
   /**
+   * Update a specific field in a transaction within a block
+   */
+  async updateTransactionField(blockIndex: number, transactionIndex: number, field: string, value: string): Promise<void> {
+    const editableBlocks = this.editableBlocksSubject.value;
+    
+    if (editableBlocks[blockIndex] && editableBlocks[blockIndex].transactions && editableBlocks[blockIndex].transactions[transactionIndex]) {
+      // Update the transaction field
+      editableBlocks[blockIndex].transactions[transactionIndex][field] = value;
+      
+      // Mark block as modified
+      editableBlocks[blockIndex].isModified = true;
+      
+      // Recalculate blockchain with new hash using SHA256
+      const updatedBlocks = await this.hashingService.recalculateBlockchain(editableBlocks, blockIndex);
+      this.editableBlocksSubject.next(updatedBlocks);
+      
+      // Show feedback
+      this.toastService.info('Transaction Updated', `Transaction ${field} has been updated and block hashes recalculated`);
+    }
+  }
+
+  /**
    * Cancel changes for a block (restore original data)
    */
   async cancelBlockChanges(blockIndex: number): Promise<void> {

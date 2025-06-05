@@ -18,6 +18,8 @@ import {
 } from '../../services/blockchain.service';
 import { WalletService } from '../../services/wallet.service';
 import { BlockchainLoadingProgressComponent } from './blockchain-loading-progress';
+import { BlockEditorComponent } from '../block-editor/block-editor';
+import { EditableBlockData } from '../../services/hashing.service';
 
 @Component({
   selector: 'app-blockchain-viewer',
@@ -31,6 +33,7 @@ import { BlockchainLoadingProgressComponent } from './blockchain-loading-progres
     HlmCardContentDirective,
     HlmButtonDirective,
     BlockchainLoadingProgressComponent,
+    BlockEditorComponent,
   ],
   template: `
     <section hlmCard class="w-4/5 mx-auto mb-5" *ngIf="connected$ | async">
@@ -60,7 +63,7 @@ import { BlockchainLoadingProgressComponent } from './blockchain-loading-progres
             <div class="font-bold text-xl text-blue-600">
               {{ getBlocksCount() }}
             </div>
-            <div class="text-sm text-gray-600 dark:text-gray-400">
+            <div class="text-sm text-yellow-600 dark:text-yellow-400">
               Total Blocks
             </div>
           </div>
@@ -68,7 +71,7 @@ import { BlockchainLoadingProgressComponent } from './blockchain-loading-progres
             <div class="font-bold text-xl text-green-600">
               {{ getLatestBlockNumber() }}
             </div>
-            <div class="text-sm text-gray-600 dark:text-gray-400">
+            <div class="text-sm text-yellow-600 dark:text-yellow-400">
               Latest Block
             </div>
           </div>
@@ -78,7 +81,7 @@ import { BlockchainLoadingProgressComponent } from './blockchain-loading-progres
             <div class="font-bold text-xl text-purple-600">
               {{ isChainValid() ? '✅' : '❌' }}
             </div>
-            <div class="text-sm text-gray-600 dark:text-gray-400">
+            <div class="text-sm text-yellow-600 dark:text-yellow-400">
               Chain Integrity
             </div>
           </div>
@@ -102,8 +105,36 @@ import { BlockchainLoadingProgressComponent } from './blockchain-loading-progres
           </div>
         </div>
 
+        <!-- Enhanced Blockchain Validation Display -->
+        <div *ngIf="(editableBlocks$ | async)?.length" class="mb-6 p-4 border rounded-lg" 
+             [class.border-green-200]="getValidationStatus().status === 'valid'"
+             [class.bg-green-50]="getValidationStatus().status === 'valid'"
+             [class.border-red-200]="getValidationStatus().status === 'invalid'"
+             [class.bg-red-50]="getValidationStatus().status === 'invalid'">
+          <div class="flex justify-between items-center mb-2">
+            <span class="font-medium">Blockchain Validation Status:</span>
+            <span class="px-3 py-1 rounded text-sm font-medium"
+                  [class.bg-green-100]="getValidationStatus().status === 'valid'"
+                  [class.text-green-800]="getValidationStatus().status === 'valid'"
+                  [class.bg-red-100]="getValidationStatus().status === 'invalid'"
+                  [class.text-red-800]="getValidationStatus().status === 'invalid'">
+              {{ getValidationStatus().message }}
+            </span>
+          </div>
+            <div class="text-sm space-y-1">
+            <div *ngFor="let detail of getValidationStatus().details" class="text-yellow-600">
+              • {{ detail }}
+            </div>
+          </div>
+          <div class="mt-3 flex space-x-2">
+            <button hlmBtn variant="outline" size="sm" (click)="restoreAllBlocks()">
+              🔄 Restore All Blocks
+            </button>
+          </div>
+        </div>
+
         <!-- Blocks Carousel -->
-        <div class="relative" *ngIf="(blocks$ | async)?.length">
+        <div class="relative" *ngIf="(editableBlocks$ | async)?.length">
           <!-- Navigation Controls -->
           <div class="flex justify-between items-center mb-4">
             <button
@@ -117,15 +148,15 @@ import { BlockchainLoadingProgressComponent } from './blockchain-loading-progres
               <span>Previous</span>
             </button>
 
-            <div class="text-sm text-gray-600 dark:text-gray-400">
-              Block {{ currentSlide + 1 }} of {{ (blocks$ | async)?.length }}
+            <div class="text-sm text-yellow-600 dark:text-yellow-400">
+              Block {{ currentSlide + 1 }} of {{ (editableBlocks$ | async)?.length }}
             </div>
 
             <button
               hlmBtn
               variant="secondary"
               (click)="nextSlide()"
-              [disabled]="currentSlide >= ((blocks$ | async)?.length || 0) - 1"
+              [disabled]="currentSlide >= ((editableBlocks$ | async)?.length || 0) - 1"
               class="flex items-center space-x-2"
             >
               <span>Next</span>
@@ -135,11 +166,51 @@ import { BlockchainLoadingProgressComponent } from './blockchain-loading-progres
 
           <!-- Block Display -->
           <div
-            *ngFor="let block of blocks$ | async; let i = index"
+            *ngFor="let block of editableBlocks$ | async; let i = index"
             [class.hidden]="i !== currentSlide"
-            class="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+            class="border border-yellow-200 dark:border-yellow-700 rounded-lg p-4"
+            [class.border-blue-300]="block.isEditing"
+            [class.bg-blue-50]="block.isEditing"
           >
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Block Editor (when editing) -->
+            <div *ngIf="block.isEditing; else viewMode">
+              <app-block-editor
+                [block]="block"
+                [blockIndex]="i"
+                (save)="onBlockSaved()"
+                (cancel)="onBlockCancelled()">
+              </app-block-editor>
+            </div>
+
+            <!-- View Mode Template -->
+            <ng-template #viewMode>
+              <!-- Block Header with Edit Button -->
+              <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center space-x-3">
+                  <h4 class="font-bold text-lg text-blue-600">
+                    🧱 Block #{{ block.number }}
+                  </h4>
+                  <span 
+                    class="px-2 py-1 rounded text-xs font-mono"
+                    [class.bg-green-100]="block.isValidHash"
+                    [class.text-green-800]="block.isValidHash"
+                    [class.bg-red-100]="!block.isValidHash"
+                    [class.text-red-800]="!block.isValidHash"
+                  >
+                    {{ block.isValidHash ? '✅ Valid Hash' : '❌ Invalid Hash' }}
+                  </span>
+                </div>
+                <button
+                  hlmBtn
+                  variant="outline"
+                  size="sm"
+                  (click)="toggleEditMode(i)"
+                >
+                  ✏️ Edit Block
+                </button>
+              </div>
+              
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <!-- Block Information -->
               <div>
                 <h4 class="font-bold text-lg mb-3 text-blue-600">
@@ -214,7 +285,7 @@ import { BlockchainLoadingProgressComponent } from './blockchain-loading-progres
                           <span class="font-medium">Decoded Params:</span>
                         </div>
                         <div
-                          class="bg-gray-50 p-2 rounded text-xs"
+                          class="bg-yellow-50 p-2 rounded text-xs"
                           style="white-space: normal;"
                           [innerHTML]="
                             getFormattedDecodedArgs(decoded.decodedArgs)
@@ -242,7 +313,7 @@ import { BlockchainLoadingProgressComponent } from './blockchain-loading-progres
                   </ng-container>
                 </div>
                 <ng-template #noTransactions>
-                  <div class="text-center py-4 text-gray-500">
+                  <div class="text-center py-4 text-yellow-500">
                     <span class="text-2xl">📭</span>
                     <p class="mt-2">No transactions in this block</p>
                   </div>
@@ -295,6 +366,7 @@ import { BlockchainLoadingProgressComponent } from './blockchain-loading-progres
                 </div>
               </div>
             </div>
+            </ng-template>
           </div>
 
           <!-- Block Navigation Dots -->
@@ -304,7 +376,7 @@ import { BlockchainLoadingProgressComponent } from './blockchain-loading-progres
               (click)="goToSlide(i)"
               class="w-2 h-2 rounded-full transition-colors"
               [class.bg-blue-600]="i === currentSlide"
-              [class.bg-gray-300]="i !== currentSlide"
+              [class.bg-yellow-300]="i !== currentSlide"
               [title]="'Block ' + block.number"
             ></button>
           </div>
@@ -316,7 +388,7 @@ import { BlockchainLoadingProgressComponent } from './blockchain-loading-progres
           class="text-center py-8"
         >
           <span class="text-4xl">⛓️</span>
-          <p class="mt-2 text-gray-600 dark:text-gray-400">
+          <p class="mt-2 text-yellow-600 dark:text-yellow-400">
             No blocks loaded yet
           </p>
           <button hlmBtn class="mt-4" (click)="loadBlocks()">
@@ -329,6 +401,7 @@ import { BlockchainLoadingProgressComponent } from './blockchain-loading-progres
 })
 export class BlockchainViewerComponent implements OnInit {
   blocks$: Observable<BlockData[]>;
+  editableBlocks$: Observable<EditableBlockData[]>;
   loading$: Observable<boolean>;
   error$: Observable<string | null>;
   connected$: Observable<boolean>;
@@ -342,6 +415,7 @@ export class BlockchainViewerComponent implements OnInit {
     private walletService: WalletService
   ) {
     this.blocks$ = this.blockchainService.blocks$;
+    this.editableBlocks$ = this.blockchainService.editableBlocks$;
     this.loading$ = this.blockchainService.loading$;
     this.error$ = this.blockchainService.error$;
     this.connected$ = this.walletService.connected$;
@@ -423,5 +497,48 @@ export class BlockchainViewerComponent implements OnInit {
 
     console.log('Final formatted HTML:', formatted);
     return formatted || '<div class="text-gray-500 italic">No parameters</div>';
+  }
+
+  // ========== EDITING METHODS ==========
+
+  /**
+   * Get validation status for display
+   */
+  getValidationStatus(): {
+    status: 'valid' | 'invalid' | 'mixed';
+    message: string;
+    details: string[];
+  } {
+    return this.blockchainService.getValidationStatus();
+  }
+
+  /**
+   * Toggle edit mode for a block
+   */
+  toggleEditMode(blockIndex: number): void {
+    this.blockchainService.toggleEditMode(blockIndex);
+  }
+
+  /**
+   * Handle block save event
+   */
+  onBlockSaved(): void {
+    // Block has been saved, refresh validation status
+    console.log('Block saved successfully');
+  }
+
+  /**
+   * Handle block cancel event
+   */
+  onBlockCancelled(): void {
+    // Block editing was cancelled
+    console.log('Block editing cancelled');
+  }
+
+  /**
+   * Restore all blocks to original state
+   */
+  restoreAllBlocks(): void {
+    this.blockchainService.restoreAllBlocks();
   }
 }

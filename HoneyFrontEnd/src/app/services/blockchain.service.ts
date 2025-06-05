@@ -10,6 +10,7 @@ import {
 } from 'ethers';
 import { WalletService } from './wallet.service';
 import { ToastService } from './toast.service';
+import { HashingService, EditableBlockData } from './hashing.service';
 
 export interface BlockData {
   number: string;
@@ -70,6 +71,7 @@ export class BlockchainService {
   ];
 
   private blocksSubject = new BehaviorSubject<BlockData[]>([]);
+  private editableBlocksSubject = new BehaviorSubject<EditableBlockData[]>([]);
   private loadingSubject = new BehaviorSubject<boolean>(false);
   private errorSubject = new BehaviorSubject<string | null>(null);
   private progressSubject = new BehaviorSubject<LoadingProgress>({
@@ -79,13 +81,15 @@ export class BlockchainService {
   });
 
   public blocks$: Observable<BlockData[]> = this.blocksSubject.asObservable();
+  public editableBlocks$: Observable<EditableBlockData[]> = this.editableBlocksSubject.asObservable();
   public loading$: Observable<boolean> = this.loadingSubject.asObservable();
   public error$: Observable<string | null> = this.errorSubject.asObservable();
   public progress$: Observable<LoadingProgress> = this.progressSubject.asObservable();
 
   constructor(
     private walletService: WalletService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private hashingService: HashingService
   ) {}
 
 async loadBlocks(): Promise<void> {
@@ -157,6 +161,10 @@ async loadBlocks(): Promise<void> {
 
     console.log('Loaded blocks:', blocks.length, 'latest block number:', latest);
     this.blocksSubject.next(blocks);
+    
+    // Create editable blocks
+    const editableBlocks = blocks.map(block => this.hashingService.createEditableBlock(block));
+    this.editableBlocksSubject.next(editableBlocks);
     
     // Complete progress
     this.progressSubject.next({
@@ -394,6 +402,132 @@ async loadBlocks(): Promise<void> {
   // Clear blocks data
   clearBlocks(): void {
     this.blocksSubject.next([]);
+    this.editableBlocksSubject.next([]);
     this.errorSubject.next(null);
+  }
+
+  // ========== EDITING METHODS ==========
+
+  /**
+   * Toggle edit mode for a specific block
+   */
+  toggleEditMode(blockIndex: number): void {
+    const editableBlocks = this.editableBlocksSubject.value;
+    if (editableBlocks[blockIndex]) {
+      editableBlocks[blockIndex].isEditing = !editableBlocks[blockIndex].isEditing;
+      this.editableBlocksSubject.next([...editableBlocks]);
+    }
+  }
+
+  /**
+   * Update a specific field in a block and recalculate hashes
+   */
+  updateBlockField(blockIndex: number, field: keyof BlockData, value: string): void {
+    const editableBlocks = this.editableBlocksSubject.value;
+    
+    if (editableBlocks[blockIndex]) {
+      // Update the field
+      (editableBlocks[blockIndex] as any)[field] = value;
+      
+      // Recalculate blockchain with new hash
+      const updatedBlocks = this.hashingService.recalculateBlockchain(editableBlocks, blockIndex);
+      this.editableBlocksSubject.next(updatedBlocks);
+      
+      // Show feedback
+      this.toastService.info('Block Updated', `${field} has been updated and hashes recalculated`);
+    }
+  }
+
+  /**
+   * Save changes for a block (finalize edit mode)
+   */
+  saveBlockChanges(blockIndex: number): void {
+    const editableBlocks = this.editableBlocksSubject.value;
+    
+    if (editableBlocks[blockIndex]) {
+      editableBlocks[blockIndex].isEditing = false;
+      this.editableBlocksSubject.next([...editableBlocks]);
+      
+      const validation = this.hashingService.getValidationStatus(editableBlocks);
+      
+      if (validation.status === 'valid') {
+        this.toastService.success('Changes Saved', 'Block changes saved and blockchain is valid');
+      } else {
+        this.toastService.warning('Changes Saved', 'Block changes saved but blockchain integrity is compromised');
+      }
+    }
+  }
+
+  /**
+   * Cancel changes for a block (restore original data)
+   */
+  cancelBlockChanges(blockIndex: number): void {
+    const editableBlocks = this.editableBlocksSubject.value;
+    
+    if (editableBlocks[blockIndex]) {
+      // Restore original data
+      const restoredBlock = this.hashingService.restoreOriginalData(editableBlocks[blockIndex]);
+      editableBlocks[blockIndex] = restoredBlock;
+      
+      // Recalculate blockchain to fix any cascading changes
+      const updatedBlocks = this.hashingService.recalculateBlockchain(editableBlocks, blockIndex);
+      this.editableBlocksSubject.next(updatedBlocks);
+      
+      this.toastService.info('Changes Cancelled', 'Block has been restored to original state');
+    }
+  }
+
+  /**
+   * Restore all blocks to their original state
+   */
+  restoreAllBlocks(): void {
+    const editableBlocks = this.editableBlocksSubject.value;
+    const restoredBlocks = editableBlocks.map(block => this.hashingService.restoreOriginalData(block));
+    
+    this.editableBlocksSubject.next(restoredBlocks);
+    this.toastService.success('All Blocks Restored', 'All blocks have been restored to their original state');
+  }
+
+  /**
+   * Get validation status for the current blockchain
+   */
+  getValidationStatus(): {
+    status: 'valid' | 'invalid' | 'mixed';
+    message: string;
+    details: string[];
+  } {
+    const editableBlocks = this.editableBlocksSubject.value;
+    return this.hashingService.getValidationStatus(editableBlocks);
+  }
+
+  /**
+   * Enhanced blockchain validation that uses the hashing service
+   */
+  validateEditableBlockchain(): { isValid: boolean; invalidBlocks: number[]; hashMismatches: number[] } {
+    const editableBlocks = this.editableBlocksSubject.value;
+    return this.hashingService.validateBlockchain(editableBlocks);
+  }
+
+  /**
+   * Get the current editable blocks
+   */
+  getEditableBlocks(): EditableBlockData[] {
+    return this.editableBlocksSubject.value;
+  }
+
+  /**
+   * Check if any blocks are currently being edited
+   */
+  hasEditingBlocks(): boolean {
+    const editableBlocks = this.editableBlocksSubject.value;
+    return editableBlocks.some(block => block.isEditing);
+  }
+
+  /**
+   * Get count of blocks with invalid hashes
+   */
+  getInvalidHashCount(): number {
+    const editableBlocks = this.editableBlocksSubject.value;
+    return editableBlocks.filter(block => !block.isValidHash).length;
   }
 }

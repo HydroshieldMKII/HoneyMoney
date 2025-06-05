@@ -59,7 +59,7 @@ import { EditableBlockData } from '../../services/hashing.service';
       </div>
       <div hlmCardContent>
         <!-- Blockchain Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div class="text-center p-4 bg-blue-50 dark:bg-blue-900 rounded-lg">
             <div class="font-bold text-xl text-blue-600">
               {{ getBlocksCount() }}
@@ -74,16 +74,6 @@ import { EditableBlockData } from '../../services/hashing.service';
             </div>
             <div class="text-sm text-yellow-600 dark:text-yellow-400">
               Latest Block
-            </div>
-          </div>
-          <div
-            class="text-center p-4 bg-purple-50 dark:bg-purple-900 rounded-lg"
-          >
-            <div class="font-bold text-xl text-purple-600">
-              {{ isChainValid() ? '✅' : '❌' }}
-            </div>
-            <div class="text-sm text-yellow-600 dark:text-yellow-400">
-              Chain Integrity
             </div>
           </div>
         </div>

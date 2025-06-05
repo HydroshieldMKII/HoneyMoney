@@ -54,7 +54,7 @@ import { BlockchainService, BlockData } from '../../services/blockchain.service'
       
       <div hlmCardContent>
         <!-- Hash Display -->
-        <div class="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900 rounded-lg">
+        <div class="mb-6 p-4 bg-yellow-50 dark:bg-yellow-300 rounded-lg">
           <div class="flex justify-between items-center mb-2">
             <span class="font-medium text-sm">Current Hash:</span>
             <span 
@@ -67,7 +67,7 @@ import { BlockchainService, BlockData } from '../../services/blockchain.service'
               {{ block.isValidHash ? '✅ Valid' : '❌ Invalid' }}
             </span>
           </div>
-          <div class="font-mono text-xs break-all bg-white dark:bg-yellow-800 p-2 rounded border">
+          <div class="font-mono text-xs break-all bg-white dark:bg-gray-200 p-2 rounded border">
             {{ block.hash }}
           </div>
         </div>
@@ -219,22 +219,6 @@ import { BlockchainService, BlockData } from '../../services/blockchain.service'
               </div>
             </div>
           </div>
-
-          <!-- Restore Original Button -->
-          <div class="border-t pt-4 mt-4">
-            <button
-              hlmBtn
-              variant="outline"
-              type="button"
-              (click)="restoreOriginal()"
-              class="w-full"
-            >
-              🔄 Restore Original Values
-            </button>
-            <small class="text-yellow-600 text-xs block mt-1 text-center">
-              This will restore all values to their original state
-            </small>
-          </div>
         </form>
       </div>
     </div>
@@ -370,13 +354,4 @@ export class BlockEditorComponent implements OnInit, OnDestroy {
         this.blockchainService.cancelBlockChanges(this.blockIndex);
         this.cancel.emit();
     }
-
-  restoreOriginal(): void {
-    this.blockchainService.cancelBlockChanges(this.blockIndex);
-    
-    // Reinitialize form with original values
-    setTimeout(() => {
-      this.initializeForm();
-    }, 100);
-  }
 }

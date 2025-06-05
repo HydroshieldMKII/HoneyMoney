@@ -319,7 +319,18 @@ export class TokenService {
       this.toastService.error('Amount is required');
       throw new Error('Amount is required');
     }
-    if (isNaN(Number(amount)) || parseFloat(amount) <= 0) {
+
+    if (isNaN(Number(amount))){
+      this.toastService.error('Amount must be a number');
+      throw new Error('Amount must be a number');
+    }
+
+    if (parseFloat(amount) == 0){
+      this.toastService.error('Amount cannot be zero');
+      throw new Error('Amount cannot be zero');
+    }
+
+    if (parseFloat(amount) <= 0) {
       this.toastService.error('Amount must be a positive number');
       throw new Error('Amount must be a positive number');
     }

@@ -50,10 +50,12 @@ contract HoneyMoney is ERC20 {
         require(!paused, "Contract is paused");
         require(!isBlacklisted(msg.sender), "Sender is blacklisted");
         require(!isBlacklisted(recipient), "Recipient is blacklisted");
+        require(balanceOf(msg.sender) >= amount, "Insufficient balance");
+
         return super.transfer(recipient, amount);
     }
 
-    function mint(address to, uint256 amount) public {
+    function mint(address to, uint256 amount) public adminOnly{
         require(!paused, "Contract is paused");
         require(!isBlacklisted(to), "Cannot mint to a blacklisted address");
         _mint(to, amount);

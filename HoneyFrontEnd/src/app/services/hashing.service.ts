@@ -45,6 +45,7 @@ export class HashingService {
         this.hexToBytes(block.extraData), // 12: extraData
         this.hexToBytes(block.mixHash), // 13: mixHash
         this.hexToBytes(block.nonce), // 14: nonce
+        
       ];
 
       // console.log('RLP data prepared:');
@@ -76,11 +77,6 @@ export class HashingService {
       // Calculate SHA256 hash (instead of keccak256 to demonstrate blockchain integrity)
       const calculatedHash = await this.sha256(encoded);
 
-      // console.log('RLP encoded bytes length:', encoded.length);
-      // console.log('Calculated hash:', calculatedHash);
-      // console.log('Expected hash:  ', block.hash);
-      // console.log('Hashes match:', calculatedHash.toLowerCase() === block.hash.toLowerCase());
-      // console.log('=== END HASH CALCULATION ===\n');
 
       return calculatedHash;
     } catch (error) {

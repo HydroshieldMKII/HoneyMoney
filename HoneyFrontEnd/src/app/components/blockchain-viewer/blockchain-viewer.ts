@@ -314,13 +314,13 @@ import { EditableBlockData } from '../../services/hashing.service';
               </div>
             </div>
 
-            <!-- Additional Block Details (Collapsible) -->
+            <!-- Block Hashes (Collapsible) -->
             <div class="mt-4 pt-4 border-t">
               <button
                 class="text-sm text-blue-600 hover:text-blue-800"
                 (click)="toggleBlockDetails(i)"
               >
-                {{ showDetails[i] ? 'Hide' : 'Show' }} Additional Details
+                {{ showDetails[i] ? 'Hide' : 'Show' }} Block Hashes
               </button>
 
               <div

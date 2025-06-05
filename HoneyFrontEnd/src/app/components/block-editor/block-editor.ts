@@ -1,7 +1,7 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Subject, takeUntil, debounceTime, distinctUntilChanged, from } from 'rxjs';
 import {
   HlmCardContentDirective,
   HlmCardDescriptionDirective,
@@ -59,8 +59,8 @@ import { BlockchainService, BlockData } from '../../services/blockchain.service'
             <span class="font-medium text-sm">Current Hash:</span>
             <span 
               class="px-2 py-1 rounded text-xs font-mono"
-              [class.bg-green-100]="block.isValidHash"
-              [class.text-green-800]="block.isValidHash"
+              [class.bg-yellow-100]="block.isValidHash"
+              [class.text-yellow-800]="block.isValidHash"
               [class.bg-red-100]="!block.isValidHash"
               [class.text-red-800]="!block.isValidHash"
             >
@@ -150,6 +150,77 @@ import { BlockchainService, BlockData } from '../../services/blockchain.service'
                 class="w-full px-3 py-2 border border-yellow-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 font-mono text-xs"
                 placeholder="0x..."
               />
+            </div>
+          </div>
+
+          <!-- Transaction Details -->
+          <div class="border-t pt-4 mt-4" *ngIf="block.transactions && block.transactions.length > 0">
+            <h5 class="font-medium mb-3">📋 Transaction Details</h5>
+            <div class="bg-yellow-50 dark:bg-yellow-200 p-4 rounded-lg">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium mb-1">From Address</label>
+                  <input
+                    type="text"
+                    formControlName="transactionFrom"
+                    class="w-full px-3 py-2 border border-yellow-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 font-mono text-xs"
+                    placeholder="0x..."
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium mb-1">To Address (Contract)</label>
+                  <input
+                    type="text"
+                    formControlName="transactionTo"
+                    class="w-full px-3 py-2 border border-yellow-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 font-mono text-xs"
+                    placeholder="0x..."
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium mb-1">Value (ETH)</label>
+                  <input
+                    type="text"
+                    formControlName="transactionValue"
+                    class="w-full px-3 py-2 border border-yellow-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 font-mono text-xs"
+                    placeholder="0x0"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium mb-1">Gas Limit</label>
+                  <input
+                    type="text"
+                    formControlName="transactionGasLimit"
+                    class="w-full px-3 py-2 border border-yellow-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                    placeholder="21000"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium mb-1">Gas Price (Gwei)</label>
+                  <input
+                    type="text"
+                    formControlName="transactionGasPrice"
+                    class="w-full px-3 py-2 border border-yellow-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                    placeholder="20"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium mb-1">Transaction Input Data</label>
+                  <input
+                    type="text"
+                    formControlName="transactionInput"
+                    class="w-full px-3 py-2 border border-yellow-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 font-mono text-xs"
+                    placeholder="0x..."
+                  />
+                </div>
+              </div>
+              <small class="text-yellow-600 text-xs mt-2 block">
+                Modifying transaction details will affect the block's transaction root hash
+              </small>
             </div>
           </div>
 
@@ -265,6 +336,15 @@ export class BlockEditorComponent implements OnInit, OnDestroy {
       timestamp = this.block.timestamp.slice(0, 16);
     }
 
+    // Extract transaction data if available
+    const transaction = this.block.transactions?.[0];
+    const transactionFrom = transaction?.from || '';
+    const transactionTo = transaction?.to || '';
+    const transactionValue = transaction?.value || '0x0';
+    const transactionGasLimit = transaction?.gas || '';
+    const transactionGasPrice = transaction?.gasPrice || '';
+    const transactionInput = transaction?.input || '0x';
+
     this.blockForm = this.fb.group({
       number: [{ value: this.block.number, disabled: true }],
       timestamp: [timestamp, Validators.required],
@@ -280,6 +360,19 @@ export class BlockEditorComponent implements OnInit, OnDestroy {
       receiptsRoot: [this.block.receiptsRoot, Validators.required],
       mixHash: [this.block.mixHash, Validators.required],
       sha3Uncles: [this.block.sha3Uncles, Validators.required],
+      // Transaction fields
+      transactionFrom: [transactionFrom],
+      transactionTo: [transactionTo],
+      transactionValue: [transactionValue],
+      transactionGasLimit: [transactionGasLimit],
+      transactionGasPrice: [transactionGasPrice],
+      transactionInput: [transactionInput],
+      from: [transactionFrom, Validators.required],
+      to: [transactionTo, Validators.required],
+      input: [transactionInput, Validators.required],
+      value: [transactionValue, Validators.required],
+      gas: [transactionGasLimit, Validators.required],
+      gasPrice: [transactionGasPrice, Validators.required],
     });
   }
 

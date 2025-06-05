@@ -258,7 +258,7 @@ export class HashingService {
     const newHash = await this.calculateBlockHash(changedBlock);
     changedBlock.hash = newHash;
 
-    changedBlock.isValidHash = false; // Modified blocks are always invalid (SHA256 vs keccak256)
+    changedBlock.isValidHash = true; // Modified blocks are always valid (SHA256)
 
     // Update parent hash for subsequent blocks
     for (let i = changedBlockIndex + 1; i < updatedBlocks.length; i++) {

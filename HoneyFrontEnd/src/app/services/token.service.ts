@@ -8,7 +8,7 @@ import { catchError, map } from 'rxjs/operators';
 export interface TokenData {
   totalSupply: string;
   contractOwner: string;
-  isPaused: boolean;
+  isPaused: boolean | undefined;
   contractAddress: string;
   userBalance: string;
   name: string;
@@ -70,7 +70,7 @@ export class TokenService {
   private tokenDataSubject = new BehaviorSubject<TokenData>({
     totalSupply: '0',
     contractOwner: '',
-    isPaused: false,
+    isPaused: undefined,
     contractAddress: '',
     userBalance: '0',
     name: '',
@@ -115,7 +115,7 @@ export class TokenService {
     this.tokenDataSubject.next({
       totalSupply: '0',
       contractOwner: '',
-      isPaused: false,
+      isPaused: undefined,
       contractAddress: '',
       userBalance: '0',
       name: '',

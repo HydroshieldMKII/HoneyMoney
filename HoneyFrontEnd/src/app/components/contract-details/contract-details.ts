@@ -35,27 +35,27 @@ import { WalletService } from '../../services/wallet.service';
       <div hlmCardContent>
         <div class="space-y-2">
           <p><strong>Total Supply:</strong> 
-            <span class="font-mono text-sm">
+            <span class="font-mono text-sm" [class]="(tokenData$ | async)?.totalSupply ? '' : 'text-black'">
               {{ (tokenData$ | async)?.totalSupply || 'Unknown' }} {{ (tokenData$ | async)?.symbol || 'BEE' }}
             </span>
           </p>
           <p><strong>Contract Address:</strong> 
-            <span class="font-mono text-xs break-all">
+            <span class="font-mono text-xs break-all" [class]="(tokenData$ | async)?.contractAddress ? '' : 'text-black'">
               {{ (tokenData$ | async)?.contractAddress || 'Unknown' }}
             </span>
           </p>
           <p><strong>Contract Owner:</strong> 
-            <span class="font-mono text-xs break-all">
+            <span class="font-mono text-xs break-all" [class]="(tokenData$ | async)?.contractOwner ? '' : 'text-black'">
               {{ (tokenData$ | async)?.contractOwner || 'Unknown' }}
             </span>
           </p>
           <p><strong>Pause State:</strong> 
-            <span [class]="(tokenData$ | async)?.isPaused ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'">
-              {{ (tokenData$ | async)?.isPaused ? 'Paused enabled' : 'not active' }}
+            <span class="font-mono" [class]="(tokenData$ | async)?.isPaused ? 'text-red-600 font-semibold' : ((tokenData$ | async)?.isPaused !== undefined ? 'text-green-600 font-semibold' : 'text-black')">
+              {{ (tokenData$ | async)?.isPaused ? 'Paused enabled' : ((tokenData$ | async)?.isPaused !== undefined ? 'not active' : 'Unknown') }}
             </span>
           </p>
           <p><strong>Token Name:</strong> 
-            <span class="font-mono text-sm">
+            <span class="font-mono text-sm" [class]="(tokenData$ | async)?.name ? '' : 'text-black'">
               {{ (tokenData$ | async)?.name || 'Unknown' }}
             </span>
           </p>
@@ -84,6 +84,7 @@ export class ContractDetails {
     private walletService: WalletService
   ) {
     this.tokenData$ = this.tokenService.tokenData$;
+    console.log('ContractDetails initialized with tokenData$:', this.tokenData$);
     this.loading$ = this.tokenService.loading$;
     this.connected$ = this.walletService.connected$;
   }

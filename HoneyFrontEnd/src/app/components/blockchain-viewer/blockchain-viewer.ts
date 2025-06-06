@@ -392,7 +392,7 @@ import { EditableBlockData } from '../../services/hashing.service';
     </section>
   `,
 })
-export class BlockchainViewerComponent implements OnInit {
+export class BlockchainViewerComponent {
   blocks$: Observable<BlockData[]>;
   editableBlocks$: Observable<EditableBlockData[]>;
   loading$: Observable<boolean>;
@@ -419,13 +419,6 @@ export class BlockchainViewerComponent implements OnInit {
     this.error$ = this.blockchainService.error$;
     this.connected$ = this.walletService.connected$;
     this.progress$ = this.blockchainService.progress$;
-  }
-
-  async ngOnInit(): Promise<void> {
-    if (this.walletService.isConnected()) {
-      // Debug removed to prevent infinite loop during blockchain loading
-      this.loadBlocks();
-    }
   }
 
   // FIXED: Remove debug call from loadBlocks

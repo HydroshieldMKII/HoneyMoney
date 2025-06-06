@@ -50,7 +50,6 @@ export class AppComponent implements OnInit {
     // Auto-connect if already connected
     if (this.walletService.isConnected()) {
       this.tokenService.refreshAllData();
-      this.blockchainService.loadBlocks();
     }
   }
 
@@ -58,7 +57,6 @@ export class AppComponent implements OnInit {
     try {
       await this.walletService.connectWallet();
       await this.tokenService.refreshAllData();
-      await this.blockchainService.loadBlocks();
     } catch (error: any) {
       console.error('Failed to connect wallet:', error);
     }

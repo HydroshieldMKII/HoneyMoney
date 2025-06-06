@@ -1,0 +1,13 @@
+[Unit]
+Description=HoneyMoney Ruby Backend Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/veille-technologique-420-1SH-SW/HoneyMoney/backend
+ExecStart=/usr/bin/env ruby /root/veille-technologique-420-1SH-SW/HoneyMoney/backend/main.rb
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -1,5 +1,4 @@
 #!/bin/bash
-cd HoneyFrontEnd
-
+cd ../HoneyFrontEnd
 ng build --configuration development
 ng serve

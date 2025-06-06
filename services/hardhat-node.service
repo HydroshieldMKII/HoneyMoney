@@ -1,0 +1,12 @@
+[Unit]
+Description=Hardhat Local Blockchain Node
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/root/veille-technologique-420-1SH-SW/start-hardhat-node.sh
+WorkingDirectory=/root/veille-technologique-420-1SH-SW/HoneyMoney
+
+[Install]
+WantedBy=multi-user.target

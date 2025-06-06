@@ -20,4 +20,7 @@ npx hardhat run ./ignition/modules/honeymoney.ts --network localhost
 echo "Enabling automine back..."
 npx hardhat run ./scripts/enableAutomine.js
 
+echo "Enabling event monitoring..."
+node ./scripts/eventMonitor.js
+
 echo "Deployment completed. Enjoy!"

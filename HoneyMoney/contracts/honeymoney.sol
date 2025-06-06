@@ -15,6 +15,9 @@ contract HoneyMoney is ERC20 {
 
     mapping(address => address[]) private blackListedAddresses;
 
+    // Events
+    event Blacklisted(address indexed account, bool enabled);
+
     modifier adminOnly() {
         require(msg.sender == owner, "Only owner can call this function");
         _;
@@ -87,6 +90,9 @@ contract HoneyMoney is ERC20 {
             require(!isBlacklisted(account), "Address is already blacklisted");
             blackListedAddresses[msg.sender].push(account);
         }
+        
+        // Emit the Blacklisted event
+        emit Blacklisted(account, enabled);
     }
 
     // Check if an address is blacklisted for the caller

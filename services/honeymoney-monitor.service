@@ -1,0 +1,30 @@
+[Unit]
+Description=HoneyMoney Event Monitor
+#Documentation=https://github.com/your-repo/honeymoney
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/root/veille-technologique-420-1SH-SW/HoneyMoney
+Environment=HOME=/root
+ExecStart=/root/veille-technologique-420-1SH-SW/scripts/startMonitor.sh
+Restart=always
+RestartSec=30
+StartLimitInterval=350
+StartLimitBurst=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=honeymoney-monitor
+
+# Remove all security restrictions that prevent NVM access
+# NoNewPrivileges=true
+# ProtectSystem=strict
+# ProtectHome=true
+# ReadWritePaths=/root/veille-technologique-420-1SH-SW/HoneyMoney
+# PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

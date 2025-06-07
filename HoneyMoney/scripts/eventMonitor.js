@@ -5,9 +5,9 @@ async function monitorEvents() {
   const contract = await ethers.getContractAt("HoneyMoney", "0x5FbDB2315678afecb367f032d93F642f64180aa3");
   const provider = ethers.provider;
   
-  console.log('🚀 HoneyMoney Event Monitor started...');
-  console.log('📍 Contract address:', contract.target);
-  console.log('🌐 Network:', (await provider.getNetwork()).name);
+  console.log('HoneyMoney Event Monitor started...');
+  console.log('Contract address:', contract.target);
+  console.log('Network:', (await provider.getNetwork()).name);
   
   // Function to safely validate and extract event data
   function getEventBasics(event) {
@@ -20,13 +20,13 @@ async function monitorEvents() {
     
     // Try different ways to access event data
     if (event) {
-      // Method 1: Direct properties
+      // Direct properties
       basics.blockNumber = event.blockNumber || event.block || null;
       basics.transactionHash = event.transactionHash || event.hash || null;
       basics.logIndex = event.logIndex || event.index || null;
       basics.blockHash = event.blockHash || null;
       
-      // Method 2: Check if it's wrapped in a log property
+      // Check if it's wrapped in a log property
       if (event.log) {
         basics.blockNumber = basics.blockNumber || event.log.blockNumber;
         basics.transactionHash = basics.transactionHash || event.log.transactionHash;
@@ -34,7 +34,7 @@ async function monitorEvents() {
         basics.blockHash = basics.blockHash || event.log.blockHash;
       }
       
-      // Method 3: Check args property for some event structures
+      //Check args property for some event structures
       if (event.args && event.event) {
         // Some ethers versions put metadata here
         basics.blockNumber = basics.blockNumber || event.blockNumber;
@@ -170,8 +170,8 @@ async function monitorEvents() {
 
   // Monitor Transfer Events - Handle Transfers, Mints, and Burns
   contract.on("Transfer", async (from, to, amount, event) => {
-    console.log('\n🎯 Transfer event received');
-    console.log('📦 Raw event structure keys:', Object.keys(event || {}));
+    console.log('\nTransfer event received');
+    console.log('Raw event structure keys:', Object.keys(event || {}));
     
     try {
       const isMint = from === ethers.ZeroAddress;
@@ -228,8 +228,8 @@ async function monitorEvents() {
       await triggerN8nWebhook(eventData);
       
     } catch (error) {
-      console.error('❌ Error processing Transfer/Mint/Burn event:', error.message);
-      console.error('📄 Full error:', error);
+      console.error('Error processing Transfer/Mint/Burn event:', error.message);
+      console.error('Full error:', error);
       
       // Send minimal data to n8n even if there's an error
       try {
@@ -241,23 +241,14 @@ async function monitorEvents() {
           severity: "ERROR"
         });
       } catch (webhookError) {
-        console.error('❌ Failed to send error event to n8n:', webhookError.message);
+        console.error('Failed to send error event to n8n:', webhookError.message);
       }
     }
   });
 
-  // Monitor contract errors and disconnections
-  // contract.on("error", (error) => {
-  //   console.error('🔥 Contract error:', error.message);
-  // });
-
-  // provider.on("error", (error) => {
-  //   console.error('🌐 Provider error:', error.message);
-  // });
-
   // N8N webhook trigger - single attempt only
   async function triggerN8nWebhook(eventData) {
-    const webhookUrl = `http://192.168.0.178:5678/webhook-test/honey-money`;
+    const webhookUrl = `http://192.168.0.178:5678/webhook/honey-money`;
     
     try {
       const response = await axios.post(webhookUrl, eventData, {
@@ -268,51 +259,51 @@ async function monitorEvents() {
         }
       });
       
-      console.log(`✅ N8N webhook triggered successfully (${response.status})`);
+      console.log(`N8N webhook triggered successfully (${response.status})`);
       
     } catch (error) {
       if (error.code === 'ECONNREFUSED') {
-        console.error(`❌ N8N webhook failed: Connection refused (is N8N running on 192.168.0.178:5678?)`);
+        console.error(`N8N webhook failed: Connection refused (is N8N running on 192.168.0.178:5678?)`);
       } else if (error.code === 'ETIMEDOUT') {
-        console.error(`❌ N8N webhook failed: Timeout after 5 seconds`);
+        console.error(`N8N webhook failed: Timeout after 5 seconds`);
       } else {
-        console.error(`❌ N8N webhook failed:`, error.message);
+        console.error(`N8N webhook failed:`, error.message);
       }
     }
   }
 
   // Enhanced error logging
   process.on('uncaughtException', (error) => {
-    console.error('💥 Uncaught Exception:', error);
-    console.log('🔄 Attempting graceful shutdown...');
+    console.error('Uncaught Exception:', error);
+    console.log('Attempting graceful shutdown...');
     process.exit(1);
   });
 
   // Graceful shutdown handlers
   process.on('SIGINT', () => {
-    console.log('\n🛑 Shutting down event monitor...');
+    console.log('\nShutting down event monitor...');
     process.exit(0);
   });
 
   process.on('SIGTERM', () => {
-    console.log('\n🛑 Shutting down event monitor...');
+    console.log('\nShutting down event monitor...');
     process.exit(0);
   });
 
   // Handle unhandled promise rejections
   process.on('unhandledRejection', (reason, promise) => {
-    console.error('💥 Unhandled Rejection at:', promise, 'reason:', reason);
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
   });
 
-  console.log('👂 Monitoring Transfer, Mint, and Burn events...');
-  console.log('🪙 Mints: When tokens are created (from 0x0)');
-  console.log('🔥 Burns: When tokens are destroyed (to 0x0)');
-  console.log('💸 Transfers: Regular token movements');
-  console.log('🔄 Press Ctrl+C to stop\n');
+  console.log('Monitoring Transfer, Mint, and Burn events...');
+  console.log('Mints: When tokens are created (from 0x0)');
+  console.log('Burns: When tokens are destroyed (to 0x0)');
+  console.log('Transfers: Regular token movements');
+  console.log('Press Ctrl+C to stop\n');
 }
 
 // Start monitoring
 monitorEvents().catch((error) => {
-  console.error('💥 Fatal error in event monitor:', error);
+  console.error('Fatal error in event monitor:', error);
   process.exit(1);
 });

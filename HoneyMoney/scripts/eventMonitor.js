@@ -1,6 +1,8 @@
 const { ethers } = require("hardhat");
 const axios = require("axios");
 
+const DEBUG = false; // Set to true for debug mode, false for production
+
 async function monitorEvents() {
   const contract = await ethers.getContractAt("HoneyMoney", "0x5FbDB2315678afecb367f032d93F642f64180aa3");
   const provider = ethers.provider;
@@ -248,8 +250,8 @@ async function monitorEvents() {
 
   // N8N webhook trigger - single attempt only
   async function triggerN8nWebhook(eventData) {
-    const webhookUrl = `http://192.168.0.178:5678/webhook/honey-money`;
-    
+    const webhookUrl = `http://192.168.0.178:5678/webhook${DEBUG ? '-test' : ''}/honey-money`;
+
     try {
       const response = await axios.post(webhookUrl, eventData, {
         timeout: 5000,

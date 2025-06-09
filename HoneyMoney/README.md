@@ -2,10 +2,10 @@
 ## Values
 | Field                  | Value                                    |
 | ---------------------- | ---------------------------------------- |
-| **Network Name**       | *name*                                   |
-| **New RPC URL**        | *url*                                    |
+| **Network Name**       | *friendly name*                          |
+| **New RPC URL**        | rpc.honey-money.hydroshield.dev          |
 | **Chain ID**           | `31337` (default for Hardhat)            |
-| **Currency Symbol**    | ETH                                      |
+| **Currency Symbol**    | BEE                                      |
 | **Block Explorer URL** | *Leave empty*                            |
 
 

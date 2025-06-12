@@ -1,17 +1,50 @@
 # Rapport du projet de développement d'un contrat intelligent
 
+**Étudiant**  
+Vincent Bureau
+
+**Travail remis à**  
+Nicolas Bourré
+
+**Date de remise**  
+12 juin 2025
+
+**Dépôt Git** : https://github.com/HydroshieldMKII/veille-technologique-420-1SH-SW.git
+
+---
+
 > [!CAUTION]
 Ce rapport n'est pas un conseil financier et ne doit pas être utilisé comme tel. Il est destiné à des fins éducatives et de démonstration uniquement. L'utilisation de la blockchain et des contrats intelligents comporte des risques, et il est important de faire preuve de prudence et de diligence raisonnable avant d'interagir avec des systèmes décentralisés.
 
 ## Table des matières
 
+- [Introduction](#introduction)
+- [Développement](#développement)
+    - [La méthodologie](#la-méthodologie)
+    - [Les résultats obtenus](#les-résultats-obtenus)
+    - [Le débat](#le-débat)
+- [Explication du projet](#explication-du-projet)
+- [Explication des fonctionnalités](#explication-des-fonctionnalités)
+    - [HoneyMoney Analyser](#honeymoney-analyser)
+    - [Interface utilisateur](#interface-utilisateur)
+    - [Présentation intégrée sur le fonctionnement de la blockchain](#présentation-intégrée-sur-le-fonctionnement-de-la-blockchain)
+    - [Gestion du jeton](#gestion-du-jeton)
+    - [Leaderboard](#leaderboard)
+    - [Visualisation des blocs sur la blockchain](#visualisation-des-blocs-sur-la-blockchain)
+- [Conclusion](#conclusion)
+    - [Rappel](#rappel)
+    - [Remise en question](#remise-en-question)
+    - [Autres chemins possibles](#autres-chemins-possibles)
+- [Problèmes rencontrés](#problèmes-rencontrés)
+- [Médiagraphie](#médiagraphie)
+
 ## Introduction
 
+Les contrats intelligents représentent une avancée majeure dans le domaine de la technologie blockchain. Ces programmes auto-exécutables fonctionnent sur la blockchain et permettent d'éliminer les intermédiaires traditionnels dans de nombreux secteurs. Introduits conceptuellement par Nick Szabo en 1993, bien avant la création de Bitcoin, ils n'ont gagné en popularité qu'avec l'émergence d'Ethereum en 2015 où l'applicatif est devenu concret.
+
+Ce projet vise à explorer le développement et l'implémentation de contrats intelligents sur la blockchain Ethereum. Mon objectif est d'en apprendre sur cette technologie qui est au cœur de nombreuses applications décentralisées, en combinant programmation, cryptographie et concepts blockchain.
+
 ## Développement
-
-### Les besoins de la recherche ou du projet
-
-### L'historique
 
 ### La méthodologie
 
@@ -41,7 +74,7 @@ L'effort investi dans le projet était conforme aux prévisions. La majorité du
 
 #### Est-ce que les résultats auraient pu être mieux avec d'autres méthodes?
 
-Je crois que les résultats auraient pu être meilleurs si j'avais déployé le contrat sur une blockchain publique comme Ethereum ou Polygon, plutôt que sur une blockchain locale. Cela aurait permis de tester les interactions avec un réseau réel et d'utiliser des outils comme Etherscan pour visualiser les transactions et les blocs. Cependant, cela aurait également ajouté de la complexité au projet et des coûts réels potentiels liés aux frais de transaction.
+Je crois que les résultats auraient pu être meilleurs si j'avais déployé le contrat sur une blockchain publique comme Ethereum ou Polygon, plutôt que sur une blockchain locale. Cela aurait permis de tester les interactions avec un réseau réel et d'utiliser des outils comme Etherscan pour visualiser les transactions et les blocs. Cependant, cela aurait également ajouté de la complexité au projet et des coûts réels liés aux frais de transaction.
 
 #### Les sujets similaires
 
@@ -57,7 +90,7 @@ Le contrat intelligent HoneyMoney est jeton ERC20 basé sur la blockchain Ethere
 
 ### HoneyMoney Analyser
 
-Une intelligence artificielle (Claude de Anthropic) est intégrée pour résumer les actions effectuées et analyser si des transactions suspectes ont été effectuées, les résultats sont publiés sur la plateform discord. La librairie OpenZeppelin et le contrat solidity fournissent des événements pour notifier et déclancher un webhook n8n. Cette action déclanche un workflow n8n qui recoit les événements du contrat, les envoi à l'IA pour analyse, génere un fichier HTML résumant la transaction et les envois sur la plateform discord.
+Une intelligence artificielle (Claude de Anthropic) est intégrée pour résumer les actions effectuées et analyser si des transactions suspectes ont été effectuées, les résultats sont publiés sur la plateform discord. La librairie OpenZeppelin et le contrat solidity fournissent des événements pour notifier et déclancher un webhook n8n. Cette action déclanche un workflow qui recoit les événements du contrat, les envoi à l'IA pour analyse, génere un fichier HTML résumant la transaction et les envois sur la plateform discord.
 
 ![n8n-flow](/images/n8n-flow.png)
 
@@ -106,8 +139,6 @@ Les actions possibles avec le jeton HoneyMoney sont les suivantes :
 
 En utilisant le contrat HoneyMoney, les utilisateurs peuvent transférer des fonds entre eux de manière sécurisée et transparente. Le contrat gère les soldes des utilisateurs et assure que les transferts respectent les règles de la blockchain. Il vérifie si l'un des deux utilisateurs est bloqué, et si c'est le cas, il n'effectue pas le transfert. Il vérifie également si l'utilisateur a suffisamment de fonds pour effectuer le transfert, et si c'est le cas, il met à jour les soldes des deux utilisateurs. 
 
-Cette action est indisponible si l'adresse cible est blacklistée.
-
 #### Création de fonds
 
 L'administrateur du contrat peut créer de nouveaux fonds en émettant des jetons ERC20. Cette fonctionnalité permet de réguler la quantité de fonds disponibles dans le système ou de résoudre d'éventuelles litiges en créant des fonds supplémentaires pour les utilisateurs concernés. La création de fonds est limitée à l'administrateur du contrat, garantissant ainsi un contrôle centralisé sur cette action.
@@ -140,7 +171,7 @@ L'interface utilisateur affiche un leaderboard des 10 utilisateurs ayant le plus
 
 ### Rappel
 
-En conclusion, le projet HoneyMoney démontre la faisabilité de l'utilisation de la blockchain pour la finance décentralisée (deFi) en fournissant une interface utilisateur intuitive et des fonctionnalités de gestion des fonds. Le contrat intelligent est sécurisé et conforme aux standards ERC20, et l'intégration de l'intelligence artificielle permet d'analyser les transactions et de détecter les activités suspectes. Le projet offre également une présentation interactive pour aider les utilisateurs à comprendre le fonctionnement de la blockchain.
+En conclusion, le projet HoneyMoney démontre la faisabilité de l'utilisation de la blockchain pour la finance décentralisée (deFi) en fournissant une interface utilisateur intuitive et des fonctionnalités de gestion des fonds. Le contrat est sécurisé et conforme aux standards ERC20, et l'intégration de l'intelligence artificielle permet d'analyser les transactions et de détecter les activités suspectes. Le projet offre également une présentation interactive pour aider les utilisateurs à comprendre le fonctionnement de la blockchain.
 
 ### Remise en question
 
@@ -172,3 +203,5 @@ Nginx proxy manager. Nginx Proxy Manager. (n.d.). https://nginxproxymanager.com/
 Connect, protect, and build everywhere. Cloudflare. (n.d.). https://www.cloudflare.com/ 
 
 Solidity Programming Language. (n.d.). https://soliditylang.org/ 
+
+Wikimedia Foundation. (2025, May 22). Smart contract. Wikipedia. https://en.wikipedia.org/wiki/Smart_contract 

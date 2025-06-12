@@ -39,9 +39,8 @@ declare var Reveal: any;
               <div class="blockchain-block">
                 <h4>En-tête du Bloc</h4>
                 <p><strong>Hash Précédent :</strong> <span class="block-hash">0x1a2b3c...</span></p>
-                <p><strong>Racine de Merkle :</strong> <span class="block-hash">0x4d5e6f...</span></p>
+                <p><strong>Hash du bloc :</strong> <span class="block-hash">0x4d5e6f...</span></p>
                 <p><strong>Horodatage :</strong> 2024-01-15 14:30:00</p>
-                <p><strong>Nonce :</strong> 1,234,567</p>
                 <hr>
                 <h4>Données de Transaction</h4>
                 <p>• Transaction 1 : Alice → Bob (5 ETH)</p>
@@ -110,13 +109,34 @@ declare var Reveal: any;
               <li class="fragment">Le premier à résoudre peut ajouter le bloc et gagner une récompense</li>
             </ul>
             <div class="fragment" style="margin-top: 30px;">
-              <h4>Processus de Minage :</h4>
+              <h4>Processus de Minage classique :</h4>
               <ol>
                 <li>Collecter les transactions en attente</li>
                 <li>Essayer différentes valeurs de nonce</li>
                 <li>Calculer le hash jusqu'à atteindre la difficulté cible</li>
                 <li>Diffuser la solution au réseau</li>
                 <li>Le réseau valide et accepte le bloc</li>
+              </ol>
+            </div>
+          </section>
+
+          <!-- Ethereum proof of stake -->
+          <section>
+            <h2>Ethereum Proof of Stake</h2>
+            <ul>
+              <li class="fragment">Ethereum a migré vers un modèle de <span class="highlight">Proof of Stake (PoS)</span></li>
+              <li class="fragment">Les validateurs sont choisis en fonction de la quantité d'Ether qu'ils détiennent et sont prêts à "staker"</li>
+              <li class="fragment"> Le PoS est plus <span class="highlight">énergétiquement efficace</span> que le PoW</li>
+              <li class="fragment"> Les validateurs sont récompensés pour leur participation et pénalisés pour les comportements malveillants</li>
+            </ul>
+            <div class="fragment" style="margin-top: 15px;">
+              <h4>Processus de Validation PoS :</h4>
+              <ol>
+                <li>Les utilisateurs "stakent" leur Ether</li>
+                <li>Les validateurs sont sélectionnés aléatoirement pour proposer de nouveaux blocs</li>
+                <li>Les blocs proposés sont validés par d'autres validateurs</li>
+                <li>Les blocs validés sont ajoutés à la blockchain</li>
+                <li>Les validateurs reçoivent des récompenses en Ether</li>
               </ol>
             </div>
           </section>
@@ -140,8 +160,8 @@ declare var Reveal: any;
 
           <!-- Consensus Mechanisms -->
           <section>
-            <h2>Mécanismes de Consensus</h2>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+            <h2>Résumé des mécanismes de consensus</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
               <div class="fragment">
                 <h4>Preuve de Travail (PoW)</h4>
                 <ul>
@@ -266,11 +286,11 @@ declare var Reveal: any;
           <section>
             <h2>Défis Actuels</h2>
             <ul>
-              <li class="fragment"><strong>Évolutivité :</strong> Transactions par seconde limitées</li>
+              <li class="fragment"><strong>Évolutivité :</strong> Transactions par seconde limitées (Bitcoin: 10 minutes, Ethereum: 12 secondes)</li>
               <li class="fragment"><strong>Consommation d'Énergie :</strong> Le minage PoW nécessite beaucoup d'énergie</li>
               <li class="fragment"><strong>Réglementation :</strong> Cadres juridiques peu clairs</li>
               <li class="fragment"><strong>Expérience Utilisateur :</strong> Complexe pour les utilisateurs moyens</li>
-              <li class="fragment"><strong>Stockage :</strong> La taille de la blockchain augmente continuellement</li>
+              <li class="fragment"><strong>Stockage :</strong> La taille de la blockchain augmente continuellement (Bitcoin: 640GB, Ethereum 1.3TB)</li>
               <li class="fragment"><strong>Interopérabilité :</strong> Les différentes chaînes ne communiquent pas bien</li>
             </ul>
           </section>
@@ -326,9 +346,11 @@ declare var Reveal: any;
               <li class="fragment">Continue d'évoluer avec des solutions aux limitations actuelles</li>
               <li class="fragment">Potentiel de révolutionner de nombreuses industries</li>
             </ul>
+            <p class="fragment" style="text-align: center; margin-top: 30px;">
+              <small>Questions?</small>
+            </p>
             <p class="fragment" style="text-align: center; margin-top: 50px;">
               <strong style="font-size: 1.5em; color: #FFD700;">Démonstration!</strong><br>
-              <small>Questions?</small>
             </p>
           </section>
         </div>

@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, from } from 'rxjs';
 import {
   HlmCardContentDirective,
@@ -100,9 +100,17 @@ import { BlockchainService, BlockData } from '../../services/blockchain.service'
               <input
                 type="text"
                 formControlName="miner"
-                class="w-full px-3 py-2 border border-yellow-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 font-mono text-xs"
+                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 font-mono text-xs"
+                [class.border-yellow-300]="!blockForm.get('miner')?.invalid"
+                [class.focus:ring-yellow-500]="!blockForm.get('miner')?.invalid"
+                [class.border-red-300]="blockForm.get('miner')?.invalid && blockForm.get('miner')?.touched"
+                [class.focus:ring-red-500]="blockForm.get('miner')?.invalid && blockForm.get('miner')?.touched"
                 placeholder="0x..."
               />
+              <small *ngIf="blockForm.get('miner')?.invalid && blockForm.get('miner')?.touched" class="text-red-600 text-xs">
+                <span *ngIf="blockForm.get('miner')?.errors?.['required']">Miner address is required</span>
+                <span *ngIf="blockForm.get('miner')?.errors?.['invalidAddress']">Invalid address format (must be 0x + 40 hex characters)</span>
+              </small>
             </div>
 
             <div>
@@ -309,6 +317,61 @@ export class BlockEditorComponent implements OnInit, OnDestroy {
     private blockchainService: BlockchainService,
   ) {}
 
+  // Custom validator for hex strings
+  private hexValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value) {
+      return null; // Let required validator handle empty values
+    }
+    
+    const value = control.value.toString();
+    const cleanHex = value.startsWith('0x') ? value.slice(2) : value;
+    
+    // Check if hex contains only valid characters (0-9, a-f, A-F)
+    if (!/^[0-9a-fA-F]*$/.test(cleanHex)) {
+      return { invalidHex: true };
+    }
+    
+    return null;
+  }
+
+  // Custom validator for address format (20 bytes = 40 hex chars + 0x)
+  private addressValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value) {
+      return null;
+    }
+    
+    const value = control.value.toString();
+    if (!value.startsWith('0x')) {
+      return { invalidAddress: true };
+    }
+    
+    const cleanHex = value.slice(2);
+    if (cleanHex.length !== 40 || !/^[0-9a-fA-F]{40}$/.test(cleanHex)) {
+      return { invalidAddress: true };
+    }
+    
+    return null;
+  }
+
+  // Custom validator for hash format (32 bytes = 64 hex chars + 0x)
+  private hashValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value) {
+      return null;
+    }
+    
+    const value = control.value.toString();
+    if (!value.startsWith('0x')) {
+      return { invalidHash: true };
+    }
+    
+    const cleanHex = value.slice(2);
+    if (cleanHex.length !== 64 || !/^[0-9a-fA-F]{64}$/.test(cleanHex)) {
+      return { invalidHash: true };
+    }
+    
+    return null;
+  }
+
   ngOnInit(): void {
     this.initializeForm();
     this.setupFormValueChanges();
@@ -348,25 +411,25 @@ export class BlockEditorComponent implements OnInit, OnDestroy {
     this.blockForm = this.fb.group({
       number: [{ value: this.block.number, disabled: true }],
       timestamp: [timestamp, Validators.required],
-      miner: [this.block.miner, Validators.required],
-      parentHash: [this.block.parentHash, Validators.required],
+      miner: [this.block.miner, [Validators.required, this.addressValidator.bind(this)]],
+      parentHash: [this.block.parentHash, [Validators.required, this.hashValidator.bind(this)]],
       gasLimit: [this.block.gasLimit, [Validators.required, Validators.min(0)]],
       gasUsed: [this.block.gasUsed, [Validators.required, Validators.min(0)]],
       difficulty: [this.block.difficulty, [Validators.required, Validators.min(0)]],
-      nonce: [this.block.nonce, Validators.required],
-      extraData: [this.block.extraData, Validators.required],
-      stateRoot: [this.block.stateRoot, Validators.required],
-      transactionsRoot: [this.block.transactionsRoot, Validators.required],
-      receiptsRoot: [this.block.receiptsRoot, Validators.required],
-      mixHash: [this.block.mixHash, Validators.required],
-      sha3Uncles: [this.block.sha3Uncles, Validators.required],
+      nonce: [this.block.nonce, [Validators.required, this.hexValidator.bind(this)]],
+      extraData: [this.block.extraData, [Validators.required, this.hexValidator.bind(this)]],
+      stateRoot: [this.block.stateRoot, [Validators.required, this.hashValidator.bind(this)]],
+      transactionsRoot: [this.block.transactionsRoot, [Validators.required, this.hashValidator.bind(this)]],
+      receiptsRoot: [this.block.receiptsRoot, [Validators.required, this.hashValidator.bind(this)]],
+      mixHash: [this.block.mixHash, [Validators.required, this.hashValidator.bind(this)]],
+      sha3Uncles: [this.block.sha3Uncles, [Validators.required, this.hashValidator.bind(this)]],
       // Transaction fields
-      transactionFrom: [transactionFrom],
-      transactionTo: [transactionTo],
-      transactionValue: [transactionValue],
+      transactionFrom: [transactionFrom, this.addressValidator.bind(this)],
+      transactionTo: [transactionTo, this.addressValidator.bind(this)],
+      transactionValue: [transactionValue, this.hexValidator.bind(this)],
       transactionGasLimit: [transactionGasLimit],
       transactionGasPrice: [transactionGasPrice],
-      transactionInput: [transactionInput],
+      transactionInput: [transactionInput, this.hexValidator.bind(this)],
     });
   }
 
@@ -383,6 +446,12 @@ export class BlockEditorComponent implements OnInit, OnDestroy {
   }
 
   private updateBlockData(formValue: any): void {
+    // Don't update if form has validation errors
+    if (this.blockForm.invalid) {
+      console.warn('Form has validation errors, skipping update');
+      return;
+    }
+
     // Check if timestamp was actually changed by comparing the dates
     let timestampToUse = this.block.timestamp;
     if (formValue.timestamp) {

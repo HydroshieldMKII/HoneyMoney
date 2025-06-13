@@ -163,11 +163,19 @@ export class HashingService {
         return new Uint8Array(0);
       }
 
+      // Validate hex string - only allow 0-9, a-f, A-F
+      if (!/^[0-9a-fA-F]*$/.test(cleanHex)) {
+        console.error('Invalid hex characters in string:', hex);
+        console.error('Only 0-9, a-f, A-F characters are allowed');
+        // Return a default value instead of throwing error
+        return new Uint8Array(32); // 32 zero bytes for hash fields
+      }
+
       const evenHex = cleanHex.length % 2 === 0 ? cleanHex : '0' + cleanHex;
       return getBytes('0x' + evenHex);
     } catch (error) {
       console.error('Error converting hex to bytes:', hex, error);
-      return new Uint8Array(0);
+      return new Uint8Array(32); // Return default 32 zero bytes
     }
   }
 

@@ -18,7 +18,7 @@ echo "Disabling automine for deployement..."
 npx hardhat run ./scripts/disableAutomine.js
 
 echo "Deploying contracts..."
-npx hardhat ignition deploy ./ignition/modules/honeymoney.ts --network localhost
+npx hardhat ignition deploy ./ignition/modules/honeymoney.ts --network localhost --reset
 
 echo "Setuping HoneyMoney..."
 npx hardhat run ./ignition/modules/honeymoney.ts --network localhost

@@ -73,6 +73,7 @@ contract HoneyMoney is ERC20 {
     // Blacklist an address for the caller
     function blacklist(address account, bool enabled) public {
         require(!paused, "Contract is paused");
+        require(account != msg.sender, "Cannot blacklist yourself");
         require(blackListedAddresses[msg.sender].length < 5, "Blacklist limit reached (5 addresses max)");
 
         if (!enabled) {

@@ -83,7 +83,10 @@ L'administrateur du contrat peut mettre le contrat en pause, ce qui empêche tou
 
 ### Mécanismes de sécurité
 
-Le contrat ajoute une fonctionnalité de gestion des utilisateurs, permettant de limiter les actions indiquées précédemment à des utilisateurs spécifiques que chacun peut gérer. La librairie OpenZeppelin fournit des événements pour notifier et déclencher des actions automatisées, garantissant la traçabilité et la transparence des opérations.
+Le contrat ajoute une fonctionnalité de gestion des utilisateurs, permettant de limiter les actions indiquées précédemment à des utilisateurs spécifiques que chacun peut gérer. Il y a également plusieurs validations pour s'assurer que les actions sont effectuées de manière sécurisée :
+- Vérification des soldes avant les transferts
+- Vérification des permissions pour les actions d'administrateur
+- Mise en pause du contrat pour prévenir les abus
 
 ## Composants du système
 
@@ -132,7 +135,7 @@ L'interface utilisateur affiche un leaderboard des 10 utilisateurs ayant le plus
 
 ### Visualisation des blocs sur la blockchain
 
-Étant donné que le contrat est déployé sur une blockchain locale, les plateformes comme Etherscan ne sont pas disponibles. Le navigateur web charge les blocs de la blockchain locale et les affiche dans une interface utilisateur. Les utilisateurs peuvent modifier un bloc temporairement pour simuler de fausses transactions, mais ces modifications ne sont pas enregistrées sur la blockchain réelle. Cela permet de visualiser l'immutabilité des transactions et de comprendre comment les blocs sont liés entre eux.
+Étant donné que le contrat est déployé sur une blockchain locale, les plateformes comme Etherscan ne sont pas disponibles. Le navigateur web charge les blocs de la blockchain locale et les affiche dans l'interface utilisateur. Les utilisateurs peuvent modifier un bloc temporairement pour simuler de fausses transactions, mais ces modifications ne sont pas enregistrées sur la blockchain réelle. Cela permet de visualiser l'immutabilité des transactions et de comprendre comment les blocs sont liés entre eux.
 
 ![blockchain-viewer](/images/blockchain-viewer.png)
 
@@ -151,7 +154,7 @@ Le projet a été réalisé en plusieurs étapes :
 ### Défis techniques et solutions
 
 **Déploiement du contrat avec Hardhat sur un domaine**
-Configuration complexe pour exposer le nœud blockchain local via un proxy inverse et gestion des CORS.
+Configuration pour exposer le noeud blockchain local via un proxy inverse.
 
 **Configuration d'un wallet MetaMask pour interagir avec le contrat**
 Mise en place du réseau local dans MetaMask et gestion des clés privées pour les comptes de test.
@@ -166,7 +169,7 @@ Gestion manuelle de la création de blocs pour simuler un environnement plus ré
 Optimisation des structures de données pour réduire les coûts de gas et améliorer les performances.
 
 **Récupération des blocs complets sur la blockchain**
-Développement d'une interface pour interroger directement le nœud Ethereum et extraire les données des blocs.
+Développement d'une interface pour interroger directement le noeud Ethereum et extraire les données des blocs.
 
 ## Résultats et analyse
 

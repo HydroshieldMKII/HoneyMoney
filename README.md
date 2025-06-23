@@ -1,18 +1,5 @@
 # Rapport du projet de développement d'un contrat intelligent
 
-**Étudiant**  
-Vincent Bureau
-
-**Travail remis à**  
-Nicolas Bourré
-
-**Date de remise**  
-12 juin 2025
-
-**Dépôt Git** : https://github.com/HydroshieldMKII/veille-technologique-420-1SH-SW.git
-
----
-
 > [!CAUTION]
 Ce rapport n'est pas un conseil financier et ne doit pas être utilisé comme tel. Il est destiné à des fins éducatives et de démonstration uniquement. L'utilisation de la blockchain et des contrats intelligents comporte des risques, et il est important de faire preuve de prudence et de diligence raisonnable avant d'interagir avec des systèmes décentralisés.
 
